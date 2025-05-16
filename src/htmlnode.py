@@ -24,3 +24,17 @@ class HTMLnode:
 	# useful for debugging and logging.
     def __repr__(self):
         return f"HTML-node({self.tag}, {self.value}, {self.children}, {self.props})"
+
+class LeafNode(HTMLnode):
+    # By not setting a default for tag or value these are REQUIRED variables
+    def __init__(self, tag, value, props=None):
+        # passing an empty dict to the HTMLnode constructor declares 'no children'
+        super().__init__(tag, value, {}, props)
+
+    # Method to return a html LeafNode object formatted as html.
+    def to_html(self):
+        if self.value is None:
+            raise ValueError("Leaf node has no value!")
+        if self.tag is None:
+            return self.value
+        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
