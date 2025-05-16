@@ -38,3 +38,8 @@ class LeafNode(HTMLnode):
         if self.tag is None:
             return self.value
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+    
+    # Return a readable string representation of the TextNode instance,
+	# useful for debugging and logging.
+    def __repr__(self):
+        return f"LeafNode({self.tag}, {self.value}, {self.props})"

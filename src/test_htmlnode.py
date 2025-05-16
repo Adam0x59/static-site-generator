@@ -14,7 +14,7 @@ class TestHTMLNode(unittest.TestCase):
         self.assertEqual(node.props_to_html(), expected)
 
     # Test __repr__ method: ensure output matches the expected string representation of the node.
-    def test_repr(self):
+    def test_HTMLnode_repr(self):
         node2 = HTMLnode(
             tag="a",
             value="Link",
@@ -24,7 +24,7 @@ class TestHTMLNode(unittest.TestCase):
         self.assertEqual(node2.__repr__(), expected)
 
     # Test to_html method: should raise NotImplementedError since it's not yet implemented.
-    def test_tohtml(self):
+    def test_HTMLnode_tohtml(self):
         node3 = HTMLnode()
         with self.assertRaises(NotImplementedError):
             node3.to_html()
@@ -47,3 +47,7 @@ class TestHTMLNode(unittest.TestCase):
         node = LeafNode("a", "This is a test!", {"href":"www.google.com"})
         expected = "<a href=\"www.google.com\">This is a test!</a>"
         self.assertEqual(node.to_html(), expected)
+
+# Run the unit tests when this file is executed
+if __name__ == "__main__":
+    unittest.main()
