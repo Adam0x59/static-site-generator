@@ -74,7 +74,59 @@ class TestHTMLNode(unittest.TestCase):
             parent_node.to_html(),
             "<div><span><b>grandchild</b></span></div>",
         )
+    
+    def test_to_html_with_empty_children_list(self):
+        with self.assertRaises(ValueError):
+            ParentNode("div", []).to_html()
+
+    def test_to_html_with_deep_nested_structure(self):
+        deep_tree = ParentNode(
+            "div",
+            [
+                LeafNode("h1", "Title"),
+                ParentNode("section", [
+                    LeafNode("p", "Paragraph 1"),
+                    ParentNode("div", [
+                        LeafNode("p", "Paragraph 2"),
+                        LeafNode("p", "Paragraph 3"),
+                    ])
+                ])
+            ]
+        )
+        expected = (
+            "<div><h1>Title</h1><section><p>Paragraph 1</p>"
+            "<div><p>Paragraph 2</p><p>Paragraph 3</p></div></section></div>"
+        )
+        self.assertEqual(deep_tree.to_html(), expected)
+    
+    def test_to_html_with_props(self):
+        node = ParentNode(
+            "div",
+            [LeafNode(None, "Content")],
+            props={"class": "main", "id": "header"}
+        )
+        self.assertEqual(
+            node.to_html(),
+            '<div class="main" id="header">Content</div>'
+        )
         
+    def test_to_html_with_invalid_child_type(self):
+        class Dummy:
+            pass
+        dummy = Dummy()
+        node = ParentNode("div", [dummy])
+        with self.assertRaises(AttributeError):  # Or a custom error
+            node.to_html()
+            print(node.to_html)
+
+    def test_mixed_valid_and_invalid_children(self):
+        valid = LeafNode("p", "text")
+        class Dummy: pass
+        dummy = Dummy()
+        node = ParentNode("div", [None, valid, dummy])
+        with self.assertRaises(AttributeError):  # Adjust if custom error added
+            node.to_html()
+    
 
 # Run the unit tests when this file is executed
 if __name__ == "__main__":

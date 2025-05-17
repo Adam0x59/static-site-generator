@@ -25,11 +25,13 @@ class HTMLnode:
     def __repr__(self):
         return f"HTML-node({self.tag}, {self.value}, {self.children}, {self.props})"
 
+
+
 class LeafNode(HTMLnode):
     # By not setting a default for tag or value these are REQUIRED variables
     def __init__(self, tag, value, props=None):
         # passing an empty dict to the HTMLnode constructor declares 'no children'
-        super().__init__(tag, value, {}, props)
+        super().__init__(tag, value, [], props)
 
     # Method to return a html LeafNode object formatted as html.
     def to_html(self):
@@ -53,10 +55,12 @@ class ParentNode(HTMLnode):
     #Method to return a html ParentNode object formatted as html.
     def to_html(self):
         if self.tag is None:
-            raise ValueError("Parent node have no tag")
-        if self.children is None:
-            raise ValueError("Parent has no children")
+            raise ValueError("Parent node has no tag")
+        if not self.children:
+            raise ValueError("Children list is empty or does not exist")
         # Recursive child tree walk, when list item is None return to main path
         child_string_list = [item.to_html() for item in self.children if item is not None]
-        # Print recursion result as a joined list.
+        # Return string, fill in centre with joined list from recursive function output
+        # Print statement only required for debugging - remove in production
+        #print(repr(f"<{self.tag}{self.props_to_html()}>{"".join(child_string_list)}</{self.tag}>"))
         return f"<{self.tag}{self.props_to_html()}>{"".join(child_string_list)}</{self.tag}>"
