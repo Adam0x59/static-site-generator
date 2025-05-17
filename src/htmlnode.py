@@ -43,3 +43,20 @@ class LeafNode(HTMLnode):
 	# useful for debugging and logging.
     def __repr__(self):
         return f"LeafNode({self.tag}, {self.value}, {self.props})"
+    
+class ParentNode(HTMLnode):
+    # Set up class default/required values
+    def __init__(Self, tag, children, props=None):
+        # Passing None to the HTML node constructor declares 'no value"
+        super().__init__(tag, None, children, props)
+
+    #Method to return a html ParentNode object formatted as html.
+    def to_html(self):
+        if self.tag is None:
+            raise ValueError("Parent node have no tag")
+        if self.children is None:
+            raise ValueError("Parent has no children")
+        # Recursive child tree walk, when list item is None return to main path
+        child_string_list = [item.to_html() for item in self.children if item is not None]
+        # Print recursion result as a joined list.
+        return f"<{self.tag}{self.props_to_html()}>{"".join(child_string_list)}</{self.tag}>"
