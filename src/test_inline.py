@@ -95,7 +95,83 @@ class TestInline(unittest.TestCase):
             ],
             new_nodes,
         )
+    '''
+    def test_debug_extract_md_image(self):
+        text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+        print(extract_markdown_images(text))
 
+    def test_debug_extract_md_link(self):
+        text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        print(extract_markdown_links(text))
+    '''
+    def test_extract_markdown_images(self):
+        matches = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
 
+    def test_extract_markdown_images_broken_format(self):
+        broken = extract_markdown_images(
+            "Here is some text and a ![broken(https://image.link), which should not match"
+        )
+        self.assertNotEqual([("broken", "https://image.link")], broken)
+
+    def test_extract_markdown_link_broken_format(self):
+        broken = extract_markdown_images(
+            "Here is some text and a [broken(https://link.link), which should not match"
+        )
+        self.assertNotEqual([("broken", "https://link.link")], broken)
+
+    def test_extract_markdown_link_incorrect_format(self):
+        incorrect = extract_markdown_links(
+            "Here is some text with a ![incorrect](https://link-pretending-to-be-an.image), which should not match"
+        )
+        self.assertNotEqual([("incorrect", "https://link-pretending-to-be-an.image")], incorrect)
+
+    def test_extract_markdown_image_incorrect_format(self):
+        incorrect = extract_markdown_links(
+            "Here is some text with a [incorrect](https://image-pretending-to-be-an.link), which should not match"
+        )
+        self.assertNotEqual([("incorrect", "https://link-pretending-to-be-an.image")], incorrect)
+    
+    def test_extract_markdown_image_multi(self):
+        find_both = extract_markdown_images(
+            "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)" \
+            "and This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        )
+        self.assertEqual([("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")], find_both)
+    
+    def test_extract_markdown_link_multi(self):
+        find_both = extract_markdown_links(
+            "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)" \
+            "and This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        )
+        self.assertEqual([("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")], find_both)
+
+    def test_extract_markdown_chained_image_link(self):
+        find_links = extract_markdown_links(
+            "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)" \
+            "and This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        )
+        find_images = extract_markdown_images(
+            "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)" \
+            "and This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        )
+        find_images.extend(find_links)
+        self.assertEqual([("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg"), ("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")], find_images)
+
+    def test_extract_markdown_image_no_alt_text(self):
+        incorrect = extract_markdown_images(
+            "Here is some text with a ![](https://image.empty-alt-text), which should match"
+        )
+        self.assertEqual([("", "https://image.empty-alt-text")], incorrect)
+
+    def test_extract_markdown_link_no_anchor_text(self):
+        incorrect = extract_markdown_links(
+            "Here is some text with a [](https://link.empty-anchor-text), which should match"
+        )
+        self.assertEqual([("", "https://link.empty-anchor-text")], incorrect)
+
+    
 if __name__ == "__main__":
     unittest.main()
