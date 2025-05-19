@@ -25,41 +25,47 @@ class TestTextNode(unittest.TestCase):
     # It should return a string representation in the expected format.
     def test_TextNode_repr(self):
         node_repr = TextNode("This is a test node", TextType.LINK, "www.great-times.com")
-        expected = "TextNode(This is a test node, [anchor text](URL), www.great-times.com)"
+        expected = "TextNode(This is a test node, link, www.great-times.com)"
         self.assertEqual(node_repr.__repr__(), expected)
-    
-    def test_text(self):
+        
+    # Test text_node_to_html fucntion for TEXT type
+    def test_txttohtml_text(self):
         node = TextNode("This is a text node", TextType.TEXT)
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, None)
         self.assertEqual(html_node.value, "This is a text node")
 
-    def test_bold(self):
+    # Test text_node_to_html fucntion for BOLD type
+    def test_txttohtml_bold(self):
         node = TextNode("This is a bold node", TextType.BOLD)
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, "b")
         self.assertEqual(html_node.value, "This is a bold node")
 
-    def test_italic(self):
+    # Test text_node_to_html fucntion for ITALIC type
+    def test_txttohtml_italic(self):
         node = TextNode("This is an italic node", TextType.ITALIC)
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, "i")
         self.assertEqual(html_node.value, "This is an italic node")
 
-    def test_code(self):
+    # Test text_node_to_html fucntion for CODE type
+    def test_txttohtml_code(self):
         node = TextNode("This is a code node", TextType.CODE)
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, "code")
         self.assertEqual(html_node.value, "This is a code node")
  
-    def test_link(self):
+    # Test text_node_to_html fucntion for LINK type
+    def test_txttohtml_link(self):
         node = TextNode("This is a link", TextType.LINK, "www.google.com")
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, "a")
         self.assertEqual(html_node.value, "This is a link")
         self.assertEqual(html_node.props, {"href":"www.google.com"})
 
-    def test_image(self):
+    # Test text_node_to_html fucntion for IMAGE type
+    def test_txttohtml_image(self):
         node = TextNode("This is an image", TextType.IMAGE, "www.google.com")
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, "img")

@@ -5,11 +5,11 @@ from htmlnode import *
 # Each member maps to a Markdown-style representation.
 class TextType(Enum):
 	TEXT = "normal text"
-	BOLD = "**bold**"
-	ITALIC = "_italic_"
-	CODE = "`code`"
-	LINK = "[anchor text](URL)"
-	IMAGE = "[alt text](URL)"
+	BOLD = "bold"
+	ITALIC = "italic"
+	CODE = "code"
+	LINK = "link"
+	IMAGE = "image"
 
 # A class representing a segment of formatted text, possibly with a link or image URL.
 class TextNode:
@@ -36,6 +36,7 @@ class TextNode:
 	def __repr__(self):
 		return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
 
+# Function to convert TextNode to html, form of LeafNode.
 def text_node_to_html_node(text_node):
 	if text_node.text_type == TextType.TEXT:
 		return LeafNode(None, text_node.text)
