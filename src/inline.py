@@ -2,9 +2,11 @@ from htmlnode import *
 from textnode import *
 import re
 
+
 '''
 ***********************************************************
-This function splits a text string into a list of nodes
+This function splits a text STRING into a list of TextNode objects
+of the correct type as denoted by markdown syntax.
 ***********************************************************
 old_nodes   - A LIST of TextNodes to be processed
 -----------------------------------------------------------
@@ -55,19 +57,62 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     #print(f"\n{new_nodes}")
     return new_nodes
 
+
+'''
+***********************************************************
+Function to find markdown format images in a given string of text.
+Returns a list of tuples in the format: [("alt text": "url")"]
+-----------------------------------------------------------
+Uses regex to match strings that fit the format ![alt text](url)
+url can contain parentheses ie: ![alt text](https://example.com/image_(2)(3)(16).pdf)
+-----------------------------------------------------------
+- Does not handle nested parentheses ie: ![alt text](https://example.com/image_(2)(42(3))(16).pdf)
+this will result in the return of an empty list []
+*********************************************************** 
+'''
 def extract_markdown_images(text):
     found_links = re.findall(r"!\[([^\[\]]*)\]\(((?:[^()]+|\([^()]*\))+)\)",text)
     return found_links
 
+
+'''
+***********************************************************
+Function to find markdown format links in a given STRING of text.
+Returns a list of tuples in the format: [("anchor text": "url")]
+-----------------------------------------------------------
+Uses regex to match strings that fit the format [anchor text](url)
+url can contain parentheses ie: [anchor text](https://example.com/some_stuff_(2)(3)(16))
+-----------------------------------------------------------
+- Does not handle nested parentheses ie: [anchor text](https://example.com/some_stuff_(2)(42(3))(16))
+this will result in the return of an empty list []
+*********************************************************** 
+'''
 def extract_markdown_links(text):
     found_links = re.findall(r"(?<!!)\[([^\[\]]*)\]\(((?:[^()]+|\([^()]*\))+)\)",text)
     return found_links
 
+
+'''
+***********************************************************
+Function to split onjects of class TextNode, and of type TextType.TEXT
+into objects of type TextType.TEXT and TextType.IMAGE, all split objects
+are added to a single list to be returned. Uses extract_markdown_images()
+to perform the search and split.
+-----------------------------------------------------------
+INPUT must be a LIST, or a LIST of LISTS, containing objects of type TextNode
+-----------------------------------------------------------
+RETURNS a single LIST of objects of class TextNode
+***********************************************************
+'''
 def split_nodes_image(old_nodes):
     # Create a list to store new nodes found
     new_nodes = []
     # Iterate through old nodes
     for old_node in old_nodes:
+        #Check if old node is TextType.TEXT, if not add to new_nodes, move on to next node in the list
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
+            continue
         # Create an empty list to store found images
         images = []
         # Search current old node for image links, add any found to end of images list.
@@ -109,12 +154,29 @@ def split_nodes_image(old_nodes):
                     continue
     # When done iterating, return new_nodes
     return new_nodes
-    
+
+
+'''
+***********************************************************
+Function to split onjects of class TextNode, and of type TextType.TEXT
+into objects of type TextType.TEXT and TextType.LINK, all split objects
+are added to a single list to be returned. Uses extract_markdown_links()
+to perform the search and split for each object.
+-----------------------------------------------------------
+INPUT must be a LIST, or a LIST of LISTS, containing objects of type TextNode
+-----------------------------------------------------------
+RETURNS a single LIST of objects of class TextNode
+***********************************************************
+'''    
 def split_nodes_link(old_nodes):
     # Create a list to store new nodes found
     new_nodes = []
     # Iterate through old nodes
     for old_node in old_nodes:
+        #Check if old node is TextType.TEXT, if not add to new_nodes, move on to next node in the list
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
+            continue
         # Create an empty list to store found images
         links = []
         # Search current old node for image links add any found to end of images list

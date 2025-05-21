@@ -185,6 +185,18 @@ class TestInline(unittest.TestCase):
         split_nodes_image([node, node2])
     '''
 
+    def test_split_nodes_imade_not_textnode_bold(self):
+        node = split_nodes_image([TextNode("Some Bold Text", TextType.BOLD)])
+        self.assertEqual([TextNode("Some Bold Text", TextType.BOLD)], node)
+
+    def test_split_nodes_imade_not_textnode_italic(self):
+        node = split_nodes_image([TextNode("Some italic text", TextType.ITALIC)])
+        self.assertEqual([TextNode("Some italic text", TextType.ITALIC)], node)
+
+    def test_split_nodes_imade_not_textnode_code(self):
+        node = split_nodes_image([TextNode("Some code", TextType.CODE)])
+        self.assertEqual([TextNode("Some code", TextType.CODE)], node)
+
     def test_split_nodes_image_no_links(self):
         node = split_nodes_image([
             TextNode(
@@ -402,6 +414,17 @@ class TestInline(unittest.TestCase):
             TextNode("Image Three", TextType.LINK, "https://This-is-image_three.link")
         ], node)
     '''
+    def test_split_nodes_links_not_textnode_bold(self):
+        node = split_nodes_link([TextNode("Some Bold Text", TextType.BOLD)])
+        self.assertEqual([TextNode("Some Bold Text", TextType.BOLD)], node)
+
+    def test_split_nodes_links_not_textnode_italic(self):
+        node = split_nodes_link([TextNode("Some italic text", TextType.ITALIC)])
+        self.assertEqual([TextNode("Some italic text", TextType.ITALIC)], node)
+
+    def test_split_nodes_links_not_textnode_code(self):
+        node = split_nodes_link([TextNode("Some code", TextType.CODE)])
+        self.assertEqual([TextNode("Some code", TextType.CODE)], node)
 
     def test_split_nodes_links_no_links(self):
         node = split_nodes_link([
