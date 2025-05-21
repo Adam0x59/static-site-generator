@@ -2,6 +2,25 @@ from htmlnode import *
 from textnode import *
 import re
 
+'''
+***********************************************************
+This function splits a text string into a list of nodes
+***********************************************************
+old_nodes   - A LIST of TextNodes to be processed
+-----------------------------------------------------------
+delimiter   - A STRING used split the string into nodes
+            - Valid values:
+                - "`"   = Code
+                - "**"  = Bold
+                - "_"   = Italic
+-----------------------------------------------------------
+text_type   - A STRING denoting the text type
+            - Valid values:
+                - "TextType.CODE"   = Code
+                - "TextType.BOLD"   = Bold
+                - "TextType.ITALIC"  = Italic
+***********************************************************
+'''
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     # List to store new nodes
     new_nodes = []
@@ -51,7 +70,7 @@ def split_nodes_image(old_nodes):
     for old_node in old_nodes:
         # Create an empty list to store found images
         images = []
-        # Search current old node for image links add any found to end of images list
+        # Search current old node for image links, add any found to end of images list.
         images.extend(extract_markdown_images(old_node.text))
         # if no images are found append current old node to end of new nodes list. 
         if images == []:
@@ -139,4 +158,6 @@ def split_nodes_link(old_nodes):
     # When done iterating, return new_nodes
     return new_nodes
     
+def text_to_nodes(text):
     
+    pass
