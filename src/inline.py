@@ -105,54 +105,48 @@ RETURNS a single LIST of objects of class TextNode
 ***********************************************************
 '''
 def split_nodes_image(old_nodes):
-    # Create a list to store new nodes found
+    # List to hold the resulting TextNode objects after splitting
     new_nodes = []
-    # Iterate through old nodes
+
+    # Iterate through each input node
     for old_node in old_nodes:
-        #Check if old node is TextType.TEXT, if not add to new_nodes, move on to next node in the list
+        # If the node is not of type TEXT, pass it through unchanged
         if old_node.text_type != TextType.TEXT:
             new_nodes.append(old_node)
             continue
-        # Create an empty list to store found images
-        images = []
-        # Search current old node for image links, add any found to end of images list.
-        images.extend(extract_markdown_images(old_node.text))
-        # if no images are found append current old node to end of new nodes list. 
-        if images == []:
+
+        # Extract any markdown-style image links from the text
+        images = extract_markdown_images(old_node.text)
+
+        # If no images are found, add the node as-is
+        if not images:
             new_nodes.append(old_node)
-            # Return to outer for-loop - move on to next iteration
             continue
-        # Copy text from current old node into to_split variable
+
+        # Start with the full text of the node to be split
         to_split = old_node.text
-        # Iterate through any image links in images list
-        for i in range(len(images)):
-            # Use buffer list to store current split. 
-            buffer_list = to_split.split(f"![{images[i][0]}]({images[i][1]})", 1)
-            # Update to_split to value of second string in buffer list
-            to_split = buffer_list.pop(1)
-            # If first item in buffer list is zero append current image object to new_nodes
-            # as there is no text preceeding it.
-            if buffer_list[0] == "":
-                new_nodes.append(TextNode(images[i][0], TextType.IMAGE, images[i][1]))
-                # Return to outer for-loop - move on to next iteration
+
+        # For each image found, split the text at the image markdown
+        for alt_text, url in images:
+            # Split the text at the first occurrence of the image markdown
+            parts = to_split.split(f"![{alt_text}]({url})", 1)
+            # Update the remaining text to be processed
+            to_split = parts[1]
+
+            if parts[0] == "":
+                # No text before the image — just add the image node
+                new_nodes.append(TextNode(alt_text, TextType.IMAGE, url))
                 continue
-            # If first item in buffer is not an empty string, extend new_nodes.
-            new_nodes.extend([
-                # First add the preceding string as a text object
-                TextNode(buffer_list[0], TextType.TEXT),
-                # Next add current image object
-                TextNode(images[i][0], TextType.IMAGE, images[i][1])
-                ])
-            # If we are on the final iteration
-            if i == len(images) - 1:
-                # Check that to_split is not empty.
-                if to_split != "":
-                    # If not empty we need to append it's contents to new_nodes as a text object
-                    new_nodes.append(TextNode(to_split, TextType.TEXT))
-                else:
-                    # If empty - Return to outer for-loop - move on to next iteration
-                    continue
-    # When done iterating, return new_nodes
+
+            # Add both the preceding text and the image as separate nodes
+            new_nodes.append(TextNode(parts[0], TextType.TEXT))
+            new_nodes.append(TextNode(alt_text, TextType.IMAGE, url))
+
+        # After all images are processed, add any remaining text
+        if to_split:
+            new_nodes.append(TextNode(to_split, TextType.TEXT))
+
+    # Return the list of new nodes, now split into text and image parts
     return new_nodes
 
 
@@ -169,57 +163,57 @@ RETURNS a single LIST of objects of class TextNode
 ***********************************************************
 '''    
 def split_nodes_link(old_nodes):
-    # Create a list to store new nodes found
+    # List to hold the resulting TextNode objects after splitting
     new_nodes = []
-    # Iterate through old nodes
+
+    # Iterate through each input node
     for old_node in old_nodes:
-        #Check if old node is TextType.TEXT, if not add to new_nodes, move on to next node in the list
+        # If the node is not of type TEXT, pass it through unchanged
         if old_node.text_type != TextType.TEXT:
             new_nodes.append(old_node)
             continue
-        # Create an empty list to store found images
-        links = []
-        # Search current old node for image links add any found to end of images list
-        links.extend(extract_markdown_links(old_node.text))
-        #print(extract_markdown_links(old_node.text))
-        # if no images are found append current old node to end of new nodes list. 
-        if links == []:
+
+        # Extract any markdown-style links from the text
+        links = extract_markdown_links(old_node.text)
+
+        # If no links are found, add the node as-is
+        if not links:
             new_nodes.append(old_node)
-            # Return to outer for-loop - move on to next iteration
             continue
-        # Copy text from current old node into to_split variable
+
+        # Start with the full text of the node to be split
         to_split = old_node.text
-        # Iterate through any image links in images list
-        for i in range(len(links)):
-            # Use buffer list to store current split. 
-            buffer_list = to_split.split(f"[{links[i][0]}]({links[i][1]})", 1)
-            # Update to_split to value of second string in buffer list
-            to_split = buffer_list.pop(1)
-            # If first item in buffer list is zero append current image object to new_nodes
-            # as there is no text preceeding it.
-            if buffer_list[0] == "":
-                new_nodes.append(TextNode(links[i][0], TextType.LINK, links[i][1]))
-                # Return to outer for-loop - move on to next iteration
+
+        # For each link found, split the text at the link markdown
+        for anchor_text, url in links:
+            # Split the text at the first occurrence of the link markdown
+            parts = to_split.split(f"[{anchor_text}]({url})", 1)
+            # Update the remaining text to be processed
+            to_split = parts[1]
+
+            if parts[0] == "":
+                # No text before the link — just add the image node
+                new_nodes.append(TextNode(anchor_text, TextType.LINK, url))
                 continue
-            # If first item in buffer is not an empty string, extend new_nodes.
-            new_nodes.extend([
-                # First add the preceding string as a text object
-                TextNode(buffer_list[0], TextType.TEXT),
-                # Next add current image object
-                TextNode(links[i][0], TextType.LINK, links[i][1])
-                ])
-            # If we are on the final iteration
-            if i == len(links) - 1:
-                # Check that to_split is not empty.
-                if to_split != "":
-                    # If not empty we need to append it's contents to new_nodes as a text object
-                    new_nodes.append(TextNode(to_split, TextType.TEXT))
-                else:
-                    # If empty - Return to outer for-loop - move on to next iteration
-                    continue
-    # When done iterating, return new_nodes
+
+            # Add both the preceding text and the link as separate nodes
+            new_nodes.append(TextNode(parts[0], TextType.TEXT))
+            new_nodes.append(TextNode(anchor_text, TextType.LINK, url))
+
+        # After all links are processed, add any remaining text
+        if to_split:
+            new_nodes.append(TextNode(to_split, TextType.TEXT))
+
+    # Return the list of new nodes, now split into text and link parts
     return new_nodes
     
-def text_to_nodes(text):
-    
-    pass
+def text_to_textnodes(text):
+    output = []
+    node = TextNode(text, TextType.TEXT)
+    code_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+    bold_nodes = split_nodes_delimiter(code_nodes, "**", TextType.BOLD)
+    italic_nodes = split_nodes_delimiter(bold_nodes, "_", TextType.ITALIC)
+    image_nodes = split_nodes_image(italic_nodes)
+    output = split_nodes_link(image_nodes)
+  
+    return output

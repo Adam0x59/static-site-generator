@@ -400,20 +400,21 @@ class TestInline(unittest.TestCase):
             TextNode("Alt", TextType.IMAGE, "https://example.com/image_(1).png")
         ], node)
     
-    '''
-    def test_split_nodes_links_just_links(self):
+    
+    def test_split_nodes_links_image_plus_links(self):
         node = split_nodes_link([
             TextNode(
-            "[Image](https://This-is-a-image.link)[Image-2](https://This-is-image-2.link)[Image Three](https://This-is-image_three.link)",
+            "![Image](https://This-is-a-image.link)[Image-2](https://This-is-image-2.link)[Image Three](https://This-is-image_three.link)",
             TextType.TEXT
             )
         ])
+        #print(node)
         self.assertEqual([
-            TextNode("Image", TextType.LINK, "https://This-is-a-image.link"),
+            TextNode("![Image](https://This-is-a-image.link)", TextType.TEXT,),
             TextNode("Image-2", TextType.LINK, "https://This-is-image-2.link"),
             TextNode("Image Three", TextType.LINK, "https://This-is-image_three.link")
         ], node)
-    '''
+    
     def test_split_nodes_links_not_textnode_bold(self):
         node = split_nodes_link([TextNode("Some Bold Text", TextType.BOLD)])
         self.assertEqual([TextNode("Some Bold Text", TextType.BOLD)], node)
@@ -524,6 +525,48 @@ class TestInline(unittest.TestCase):
             TextNode("Alt", TextType.LINK, "https://example.com/image_(2)(3)(16).pdf")
         ], node)
     
+
+    def test_text_to_textnodes_debug_initial(self):
+        node = text_to_textnodes( "This is **text** with an _italic_ word and a `code block` and an " \
+                "![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        )
+        self.assertEqual([
+            TextNode("This is ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.TEXT),
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev")
+            ], node,)
+
+    def test_text_to_textnodes_empty_string(self):
+        node = text_to_textnodes("")
+        self.assertEqual([], node)
+
+    def test_text_to_textnodes_just_text(self):
+        node = text_to_textnodes("This is just a string of text!")
+        self.assertEqual([TextNode("This is just a string of text!", TextType.TEXT)], node)
+    
+    def test_text_to_textnodes_no_text_all(self):
+        node = text_to_textnodes("**bold**_italic_`code`![image](https://This-is-an-image.link)[link](https://This-is-a-link.link)")
+        self.assertEqual([
+            TextNode("bold", TextType.BOLD),
+            TextNode("italic", TextType.ITALIC),
+            TextNode("code", TextType.CODE),
+            TextNode("image", TextType.IMAGE, "https://This-is-an-image.link"),
+            TextNode("link", TextType.LINK, "https://This-is-a-link.link")
+        ], node)
+
+    def test_text_to_textnodes_fail_case(self):
+        node = text_to_textnodes("![image](https://This-is-an-image.link)[link](https://This-is-a-link.link)")
+        self.assertEqual([
+            TextNode("image", TextType.IMAGE, "https://This-is-an-image.link"),
+            TextNode("link", TextType.LINK, "https://This-is-a-link.link")
+        ],node)
 
 if __name__ == "__main__":
     unittest.main()
