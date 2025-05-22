@@ -1,3 +1,9 @@
+'''
+***********************************************************
+This file contains code related to inline markdown
+***********************************************************
+'''
+
 from htmlnode import *
 from textnode import *
 import re
@@ -94,7 +100,7 @@ def extract_markdown_links(text):
 
 '''
 ***********************************************************
-Function to split onjects of class TextNode, and of type TextType.TEXT
+Function to split objects of class TextNode, and of type TextType.TEXT
 into objects of type TextType.TEXT and TextType.IMAGE, all split objects
 are added to a single list to be returned. Uses extract_markdown_images()
 to perform the search and split.
@@ -152,7 +158,7 @@ def split_nodes_image(old_nodes):
 
 '''
 ***********************************************************
-Function to split onjects of class TextNode, and of type TextType.TEXT
+Function to split objects of class TextNode, and of type TextType.TEXT
 into objects of type TextType.TEXT and TextType.LINK, all split objects
 are added to a single list to be returned. Uses extract_markdown_links()
 to perform the search and split for each object.

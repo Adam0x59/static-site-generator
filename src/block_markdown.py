@@ -6,6 +6,7 @@ This file contains code related to block markdown
 from htmlnode import *
 from textnode import *
 from enum import Enum
+import re
 
 # Class to store block types
 class BlockType(Enum):
@@ -55,5 +56,28 @@ def markdown_to_blocks(markdown):
             continue  # Skip any resulting empty blocks
         split.append(item)  # Keep non-empty blocks
     
-    print(split)  # Optional: print blocks for debugging
+    #print(split)  # Optional: print blocks for debugging
     return split  # Return the list of clean, meaningful blocks
+
+def block_to_block_type(block):
+    
+    if re.match(r"^```.*```$", block, flags=re.DOTALL):
+        return BlockType.CODE
+
+    lines = block.split("\n")
+    if all(re.match(r"^>.*", line) for line in lines):
+        return BlockType.QUOTE
+
+    if all(re.match(r"^-\s+", line) for line in lines):
+        return BlockType.UNORDERED_LIST
+    
+    for i, line in enumerate(lines):
+        line_number = re.findall(r"^(\d+)\.",line)
+        if not line_number or int(line_number[0]) != i+1:
+            break
+    else:
+        return BlockType.ORDERED_LIST
+
+    if re.match(r"^#{1,6}\s+.*", block):
+        return BlockType.HEADING
+    return BlockType.PARAGRAPH
