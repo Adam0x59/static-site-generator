@@ -73,7 +73,8 @@ Uses regex to match strings that fit the format ![alt text](url)
 url can contain parentheses ie: ![alt text](https://example.com/image_(2)(3)(16).pdf)
 -----------------------------------------------------------
 - Does not handle nested parentheses ie: ![alt text](https://example.com/image_(2)(42(3))(16).pdf)
-this will result in the return of an empty list []
+this will result in the return of an empty list [], handling this requires recursion, possibly
+available in external regex module if required.
 *********************************************************** 
 '''
 def extract_markdown_images(text):

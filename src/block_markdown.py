@@ -17,6 +17,7 @@ class BlockType(Enum):
     UNORDERED_LIST = "unordered_list"
     ORDERED_LIST = "ordered_list"
 
+
 '''
 ***********************************************************
 A function to convert a raw markdown STRING (representing a 

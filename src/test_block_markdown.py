@@ -147,7 +147,7 @@ This is the same paragraph on a new line
         self.assertEqual(BlockType.QUOTE, block)
 
     def test_block_to_block_type_order_of_ops_code_inner_no_escape(self):
-        block = block_to_block_type("```\nThis should be a code block```this should not```\n# this is a comment not heading\n-Listy\n-list\n1. Oh-list\n2. such list...\n```")
+        block = block_to_block_type("```\nThis should be a code block```this should not```\n# this is a comment not heading\n- Listy\n- list\n1. Oh-list\n2. such list...\n```")
         self.assertEqual(BlockType.CODE, block)
 
     def test_block_to_block_type_lists_mixed(self):
