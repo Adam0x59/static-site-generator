@@ -1,35 +1,21 @@
-'''
-***********************************************************
-This file contains code related to inline markdown
-***********************************************************
-'''
+"""Module for processing inline markdown into TextNode objects."""
 
 from htmlnode import *
 from textnode import *
 import re
 
-
-'''
-***********************************************************
-This function splits a text STRING into a list of TextNode objects
-of the correct type as denoted by markdown syntax.
-***********************************************************
-old_nodes   - A LIST of TextNodes to be processed
------------------------------------------------------------
-delimiter   - A STRING used split the string into nodes
-            - Valid values:
-                - "`"   = Code
-                - "**"  = Bold
-                - "_"   = Italic
------------------------------------------------------------
-text_type   - A STRING denoting the text type
-            - Valid values:
-                - "TextType.CODE"   = Code
-                - "TextType.BOLD"   = Bold
-                - "TextType.ITALIC"  = Italic
-***********************************************************
-'''
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    """Split text nodes into formatted types based on a given delimiter.
+
+    Args:
+        old_nodes (list): List of TextNode objects to be processed.
+        delimiter (str): Delimiter string to split the text.
+                         Valid values: "`" for CODE, "**" for BOLD, "_" for ITALIC.
+        text_type (TextType): The TextType to assign to the split content.
+
+    Returns:
+        list: List of TextNode objects with appropriate text types.
+    """
     # List to store new nodes
     new_nodes = []
     # Iterate through items(old_node) in old_nodes list
@@ -63,55 +49,49 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     #print(f"\n{new_nodes}")
     return new_nodes
 
-
-'''
-***********************************************************
-Function to find markdown format images in a given string of text.
-Returns a list of tuples in the format: [("alt text": "url")"]
------------------------------------------------------------
-Uses regex to match strings that fit the format ![alt text](url)
-url can contain parentheses ie: ![alt text](https://example.com/image_(2)(3)(16).pdf)
------------------------------------------------------------
-- Does not handle nested parentheses ie: ![alt text](https://example.com/image_(2)(42(3))(16).pdf)
-this will result in the return of an empty list [], handling this requires recursion, possibly
-available in external regex module if required.
-*********************************************************** 
-'''
 def extract_markdown_images(text):
+    """Extract markdown image syntax from a string.
+
+    Matches patterns like ![alt text](url) and handles URLs with parentheses.
+
+    Args:
+        text (str): Input text string.
+
+    Returns:
+        list of tuple: List of (alt_text, url) tuples for each image found.
+
+    Note:
+        Does not handle nested parentheses in the URL.
+    """
     found_links = re.findall(r"!\[([^\[\]]*)\]\(((?:[^()]+|\([^()]*\))+)\)",text)
     return found_links
 
-
-'''
-***********************************************************
-Function to find markdown format links in a given STRING of text.
-Returns a list of tuples in the format: [("anchor text": "url")]
------------------------------------------------------------
-Uses regex to match strings that fit the format [anchor text](url)
-url can contain parentheses ie: [anchor text](https://example.com/some_stuff_(2)(3)(16))
------------------------------------------------------------
-- Does not handle nested parentheses ie: [anchor text](https://example.com/some_stuff_(2)(42(3))(16))
-this will result in the return of an empty list []
-*********************************************************** 
-'''
 def extract_markdown_links(text):
+    """Extract markdown link syntax from a string.
+
+    Matches patterns like [anchor text](url) and handles URLs with parentheses.
+
+    Args:
+        text (str): Input text string.
+
+    Returns:
+        list of tuple: List of (anchor_text, url) tuples for each link found.
+
+    Note:
+        Does not handle nested parentheses in the URL.
+    """
     found_links = re.findall(r"(?<!!)\[([^\[\]]*)\]\(((?:[^()]+|\([^()]*\))+)\)",text)
     return found_links
 
-
-'''
-***********************************************************
-Function to split objects of class TextNode, and of type TextType.TEXT
-into objects of type TextType.TEXT and TextType.IMAGE, all split objects
-are added to a single list to be returned. Uses extract_markdown_images()
-to perform the search and split.
------------------------------------------------------------
-INPUT must be a LIST, or a LIST of LISTS, containing objects of type TextNode
------------------------------------------------------------
-RETURNS a single LIST of objects of class TextNode
-***********************************************************
-'''
 def split_nodes_image(old_nodes):
+    """Split TextNode objects with markdown image syntax into TEXT and IMAGE types.
+
+    Args:
+        old_nodes (list): List of TextNode objects.
+
+    Returns:
+        list: List of TextNode objects split by image markdown.
+    """
     # List to hold the resulting TextNode objects after splitting
     new_nodes = []
 
@@ -156,20 +136,15 @@ def split_nodes_image(old_nodes):
     # Return the list of new nodes, now split into text and image parts
     return new_nodes
 
-
-'''
-***********************************************************
-Function to split objects of class TextNode, and of type TextType.TEXT
-into objects of type TextType.TEXT and TextType.LINK, all split objects
-are added to a single list to be returned. Uses extract_markdown_links()
-to perform the search and split for each object.
------------------------------------------------------------
-INPUT must be a LIST, or a LIST of LISTS, containing objects of type TextNode
------------------------------------------------------------
-RETURNS a single LIST of objects of class TextNode
-***********************************************************
-'''    
 def split_nodes_link(old_nodes):
+    """Split TextNode objects with markdown link syntax into TEXT and LINK types.
+
+    Args:
+        old_nodes (list): List of TextNode objects.
+
+    Returns:
+        list: List of TextNode objects split by link markdown.
+    """
     # List to hold the resulting TextNode objects after splitting
     new_nodes = []
 
@@ -215,6 +190,16 @@ def split_nodes_link(old_nodes):
     return new_nodes
     
 def text_to_textnodes(text):
+    """Convert a markdown-formatted string to a list of TextNode objects.
+
+    Applies processing for code, bold, italic, image, and link syntax.
+
+    Args:
+        text (str): Markdown-formatted text.
+
+    Returns:
+        list: List of TextNode objects with appropriate types.
+    """
     output = []
     node = TextNode(text, TextType.TEXT)
     code_nodes = split_nodes_delimiter([node], "`", TextType.CODE)

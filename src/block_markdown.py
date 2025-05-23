@@ -1,8 +1,5 @@
-'''
-***********************************************************
-This file contains code related to block markdown
-***********************************************************
-'''
+"""This file contains code related to block markdown"""
+
 from htmlnode import *
 from textnode import *
 from enum import Enum
@@ -17,20 +14,18 @@ class BlockType(Enum):
     UNORDERED_LIST = "unordered_list"
     ORDERED_LIST = "ordered_list"
 
-
-'''
-***********************************************************
-A function to convert a raw markdown STRING (representing a 
-full document) into a LIST of "block" STRINGS.
------------------------------------------------------------
-INPUT: A single STRING of raw markdown.
------------------------------------------------------------
-OUTPUT: A LIST of STRINGS, each string is a "block" of 
-markdown from the input (List of blocks is ordered by block
-location as in the input string).
-***********************************************************
-'''
 def markdown_to_blocks(markdown):
+    """Converts a raw markdown STRING into a LIST of "block" STRINGS
+    
+    Markdown string represents a full document
+
+    Args:
+        A single STRING of raw markdown
+
+    Returns:
+        A LIST of STRINGS, each string is a block of markdown,
+        list order same as order found in input string.
+    """
     # Step 1: Split the markdown into individual lines
     remove_line_whitespace = markdown.split("\n")
     
@@ -59,22 +54,21 @@ def markdown_to_blocks(markdown):
     #print(split)  # Optional: print blocks for debugging
     return split  # Return the list of clean, meaningful blocks
 
-
-'''
-***********************************************************
-A function to return a value for the block-type of a given
-string of text.
------------------------------------------------------------
-INPUT: A "block" of text which is a single text STRING with
-no \n\n breaks and stripped of whitespace - The output from
-markdown_to_blocks()
------------------------------------------------------------
-OUTPUT: Returns a BlockType object denoting the type of block
-passed in. This operates on the outer block only (nested or
-inline blocks should be handled seperately using inline functions)
-***********************************************************
-'''
 def block_to_block_type(block):
+    """Returns a value for the block-type of a given STRING.
+
+    Args: A "block" of text which is a single text STRING with
+    no \n\n breaks and stripped of whitespace - the output
+    from markdown_to_blocks()
+    
+    Returns: a BlockType object denoting the type of block
+    passed in. 
+    
+    Notes:
+        This operates on the outer block only nested or
+        inline blocks should be handled seperately using 
+        inline functions
+    """
     
     # Check if first and last characters of a block are ```
     if re.match(r"^```.*```$", block, flags=re.DOTALL):
@@ -107,3 +101,4 @@ def block_to_block_type(block):
     if re.match(r"^#{1,6}\s+.*", block):
         return BlockType.HEADING
     return BlockType.PARAGRAPH
+
