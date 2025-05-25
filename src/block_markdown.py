@@ -102,3 +102,45 @@ def block_to_block_type(block):
         return BlockType.HEADING
     return BlockType.PARAGRAPH
 
+def block_to_text_node(block):
+    """Takes in markdown block and it's type, converts to TextType.
+    Only converts vaiable blocks which need no further processing:
+        - Heading
+        - Code 
+    Invalid Blocks returned as is
+
+    Args:
+        block (tuple) - (block_type, block_val):
+            block_val (str): A block of markdown
+            block_type (BlockType): Type of markdown block
+    
+    Returns:
+        text_node (TextNode): If converted text node returned
+        (block_type, block): If passed, returns tuple
+    """
+    if block[0] == BlockType.HEADING:
+        hash_found_list = re.findall(r"#{1}", block[1])
+        #print(hash_found_list)
+        heading_number = len(hash_found_list)
+        #print(heading_number)
+        #print(LeafNode(f"<h{heading_number}>", block[1]))
+        return LeafNode(f"<h{heading_number}>", block[1])
+    
+    if block[0] == BlockType.CODE:
+        return LeafNode("<code>", block[1])
+    
+    return block
+
+def list_formatter(block):
+    """Converts list content into list nodes
+    
+    Args:
+        block (tuple):
+            block_val (str): Text content of markdown block
+            block_type (BlockType): Type of markdown block
+
+    Returns:
+        node (ParentNode): Parent node to contain list
+            inner_nodes (leaf node)
+    """
+    pass

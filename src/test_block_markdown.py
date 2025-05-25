@@ -159,6 +159,15 @@ This is the same paragraph on a new line
         block = block_to_block_type("1. This\n2. be\n3. a F'n\n- Mixed\n- List!")
         self.assertEqual(BlockType.PARAGRAPH, block)
         #returns pgraph -list mix invalid
-        
+
+    def test_block_to_text_node_debug(self):
+        block = (BlockType.HEADING, "# Heading 1")
+        block2 = (BlockType.HEADING, "## Heading 2")
+        block6 = (BlockType.HEADING, "###### Heading 6")
+        print(block_to_text_node(block))
+        print(block_to_text_node(block2))
+        print(block_to_text_node(block6))
+
+
 if __name__ == "__main__":
     unittest.main()

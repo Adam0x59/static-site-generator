@@ -20,7 +20,7 @@ class TestHTMLNode(unittest.TestCase):
             value="Link",
             props={"href": "https://www.google.com", "target": "_blank"}
         )
-        expected = "HTML-node(a, Link, [], {'href': 'https://www.google.com', 'target': '_blank'})"
+        expected = "HTMLnode(a, Link, [], {'href': 'https://www.google.com', 'target': '_blank'})"
         self.assertEqual(node2.__repr__(), expected)
 
     # Test to_html method: should raise NotImplementedError since it's not yet implemented.
