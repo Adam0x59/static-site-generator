@@ -14,6 +14,36 @@ class BlockType(Enum):
     UNORDERED_LIST = "unordered_list"
     ORDERED_LIST = "ordered_list"
 
+def line_to_block_type(line):
+    """Takes a line of text and returns BlockType object.
+    
+    Accepts:
+        line (str): A line of markdown text
+
+    Returns:
+        BlockType object: containing value of current line.
+    """
+    # Check if first or last characters of a line are code
+    if re.match(r"^```.*|.*```$", line, flags=re.DOTALL):
+        return BlockType.CODE
+
+    # Check if line starts with a >
+    if re.match(r"^>.*", line):
+        return BlockType.QUOTE
+
+    # Check if line is an unordered-list 
+    if re.match(r"^\s*(?:[-*+]\s+)", line):
+        return BlockType.UNORDERED_LIST
+    
+    if re.match(r"^\s*\d+\.\s+"):
+        return BlockType.ORDERED_LIST
+    
+    # Check if block starts with 1 to 6 # charachters
+    # If not block must be a paragraph
+    if re.match(r"^#{1,6}\s+.*", line):
+        return BlockType.HEADING
+    return BlockType.PARAGRAPH
+
 def markdown_to_blocks(markdown):
     """Converts a raw markdown STRING into a LIST of "block" STRINGS
     
