@@ -35,7 +35,7 @@ def line_to_block_type(line):
     if re.match(r"^\s*(?:[-*+]\s+)", line):
         return BlockType.UNORDERED_LIST
     
-    if re.match(r"^\s*\d+\.\s+"):
+    if re.match(r"^\s*\d+\.\s+", line):
         return BlockType.ORDERED_LIST
     
     # Check if block starts with 1 to 6 # charachters
@@ -44,6 +44,74 @@ def line_to_block_type(line):
         return BlockType.HEADING
     return BlockType.PARAGRAPH
 
+def markdown_to_blocks(markdown):
+    """Converts a raw markdown STRING into a LIST of "block" STRINGS
+    
+    Markdown string represents a full document
+
+    Args:
+        A single STRING of raw markdown
+
+    Returns:
+        A LIST of STRINGS, each string is a block of markdown,
+        list order same as order found in input string.
+    """
+    markdown_lines = markdown.split("\n")
+    current_block = []
+    blocks = []
+    inside_code = False
+    current_block_type = None
+
+    for line in markdown_lines:
+        stripped = line.strip()
+        rstripped = line.rstrip()
+        block_type = line_to_block_type(line)
+        if not inside_code and block_type != current_block_type and current_block:
+            if block_type not in (BlockType.ORDERED_LIST, BlockType.UNORDERED_LIST):
+                blocks.append(current_block)
+                current_block = []
+        if block_type == BlockType.CODE and inside_code == True:
+            inside_code = False
+            current_block.append(rstripped)
+            blocks.append(current_block)
+            current_block = [] 
+            current_block_type = None
+            continue
+        if inside_code == True:
+            current_block.append(rstripped)
+            continue
+        if line.strip() == "":
+            if current_block:
+                blocks.append(current_block)
+                current_block = []
+            current_block_type = None
+            continue
+        if block_type == BlockType.CODE:
+            current_block_type = block_type
+            inside_code = True
+            current_block.append(rstripped)
+            continue
+        current_block_type = block_type
+        if block_type in (BlockType.UNORDERED_LIST, BlockType.ORDERED_LIST):
+            current_block.append(rstripped)
+            continue
+        if block_type == BlockType.QUOTE:
+            current_block.append(stripped)
+            continue
+        if block_type == BlockType.HEADING:
+            current_block.append(stripped)
+            blocks.append(current_block)
+            current_block = []
+            continue
+        if block_type == BlockType.PARAGRAPH:
+            current_block.append(stripped)
+    if current_block:
+        blocks.append(current_block)
+
+    return blocks
+
+
+''' Old markdown to blocks function
 def markdown_to_blocks(markdown):
     """Converts a raw markdown STRING into a LIST of "block" STRINGS
     
@@ -83,6 +151,7 @@ def markdown_to_blocks(markdown):
     
     #print(split)  # Optional: print blocks for debugging
     return split  # Return the list of clean, meaningful blocks
+'''
 
 def block_to_block_type(block):
     """Returns a value for the block-type of a given STRING.
@@ -111,19 +180,12 @@ def block_to_block_type(block):
     if all(re.match(r"^>.*", line) for line in lines):
         return BlockType.QUOTE
 
-    # Check if each line starts with a -   
-    if all(re.match(r"^-\s+", line) for line in lines):
+    # Check if block starts with a -   
+    if re.match(r"^\s*-\s+", block):
         return BlockType.UNORDERED_LIST
     
-    # Check if each line starts with a ordered list identifier
-    # 1. Item 1
-    # 2. Item 2
-    # And so on... Also makes sure numbers start at 1 and increment sequentially.
-    for i, line in enumerate(lines):
-        line_number = re.findall(r"^(\d+)\.",line)
-        if not line_number or int(line_number[0]) != i+1:
-            break
-    else:
+    # Check if block starts with a ordered list identifier
+    if re.match(r"^\s*\d+\.\s+", block):
         return BlockType.ORDERED_LIST
     
     # Check if block starts with 1 to 6 # charachters
