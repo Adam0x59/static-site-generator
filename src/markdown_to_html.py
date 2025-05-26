@@ -20,23 +20,27 @@ def markdown_to_html(markdown):
     # *****************************************************
     # Break markdown blocks up into top level HTMLnodes by
     # *****************************************************
-    
-    # Convert markdown file into a list of markdown blocks
+
+    # Convert markdown into blocks
     markdown_blocks = markdown_to_blocks(markdown)
+
     # Convert list into list of tuples [(BlockType, markdown Block), ...]
     markdown_block_tuples = []
     for block in markdown_blocks:
         block_joined = "\n".join(block)
         markdown_block_tuples.append((block_to_block_type(block_joined), block))
-    print("\nOuter-Block Identification:\n")
+    print("\n************\nOuter-Block Identification:")
     for block in markdown_block_tuples:
         print(f"\n{block}")
-'''
-    # Convert any headings or code blocks into LeafNodes
-    mdbt_headings_code = []
-    for block in markdown_block_tuples:
-        mdbt_headings_code.append(block_to_text_node(block))
 
+    # Convert any headings or code-blocks into LeafNodes
+    headings_and_code = []
+    for block in markdown_block_tuples:
+        headings_and_code.append(block_to_text_node(block))
+    print("\n************\nHeadings and code converted:")
+    for block in headings_and_code:
+        print(f"\n{repr(f"{block}")}")
+    '''
     # Convert any un-ordered lists into a parent HTMLnode containing
     # list items as TextNodes
     for block in mdbt_headings_code:
@@ -49,7 +53,7 @@ def markdown_to_html(markdown):
     for node in mdbt_headings_code:
         #print(node)
         pass
-''' 
+    ''' 
     # *****************************************************
     # Re-assemble HTMLnodes into output file and return
     # *****************************************************
