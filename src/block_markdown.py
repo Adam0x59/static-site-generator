@@ -147,11 +147,9 @@ def block_to_block_type(block):
     return BlockType.PARAGRAPH
 
 def block_to_text_node(block):
-    """Takes in markdown block and it's type, converts to TextType.
-    Only converts vaiable blocks which need no further processing:
-        - Heading
-        - Code 
-    Invalid Blocks returned as is
+    """Takes in markdown block and it's type, converts code blocks to LeafNodes.
+
+    Invalid (non-code) Blocks are returned as is
 
     Args:
         block (tuple) - (block_type, block_val):
@@ -159,17 +157,9 @@ def block_to_text_node(block):
             block_type (BlockType): Type of markdown block
     
     Returns:
-        text_node (TextNode): If converted text node returned
+        leaf_node (LeafNode): If converted text node returned
         (block_type, block): If passed, returns tuple
     """
-    if block[0] == BlockType.HEADING:
-        hash_found_list = re.findall(r"#{1}", "\n".join(block[1]))
-        #print(hash_found_list)
-        heading_number = len(hash_found_list)
-        #print(heading_number)
-        #print(LeafNode(f"<h{heading_number}>", block[1]))
-        return LeafNode(f"h{heading_number}", "\n".join(block[1]))
-    
     if block[0] == BlockType.CODE:
         return LeafNode("code", "\n".join(block[1][1:-1]))
 

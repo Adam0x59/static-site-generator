@@ -191,7 +191,6 @@ def split_nodes_link(old_nodes):
     
 def text_to_textnodes(text):
     """Convert a markdown-formatted string to a list of TextNode objects.
-
     Applies processing for code, bold, italic, image, and link syntax.
 
     Args:

@@ -33,13 +33,53 @@ def markdown_to_html(markdown):
     for block in markdown_block_tuples:
         print(f"\n{block}")
 
-    # Convert any headings or code-blocks into LeafNodes
-    headings_and_code = []
+    # Convert any code-blocks into LeafNodes
+    code = []
     for block in markdown_block_tuples:
-        headings_and_code.append(block_to_text_node(block))
+        code.append(block_to_text_node(block))
     print("\n************\nHeadings and code converted:")
-    for block in headings_and_code:
+    for block in code:
         print(f"\n{repr(f"{block}")}")
+
+    # Convert any paragraphs into list of TextNodes
+    c_paragraphs = []
+    for block in code:
+        if isinstance(block, (LeafNode, ParentNode, HTMLnode)):
+            c_paragraphs.append(block)
+            continue
+        if block[0] == BlockType.PARAGRAPH:
+            c_paragraphs.append(ParentNode("p", block_text_to_leaf_nodes(block)))
+            continue
+        c_paragraphs.append(block)
+    print("\n************\nParagraphs Split:")
+    for block in c_paragraphs:
+        print(f"\n{repr(f"{block}")}")
+
+    cp_headings = []
+    for block in c_paragraphs:
+        if isinstance(block, (LeafNode, ParentNode, HTMLnode)):
+            cp_headings.append(block)
+            continue
+        if block[0] == BlockType.HEADING:
+            print(block[0])
+            heading_num = len(re.findall(r"^#{1,6}", "".join(block[1]))[0])
+            #print(heading_num)
+            #heading_val = len(heading_num)
+            cp_headings.append(ParentNode(f"h{heading_num}", block_text_to_leaf_nodes(block)))
+            continue
+        cp_headings.append(block)
+    print("\n************\nHeadings Split:")
+    for block in cp_headings:
+        print(f"\n{repr(f"{block}")}")
+            
+    
+def block_text_to_leaf_nodes(block):
+    block_text_nodes = text_to_textnodes("\n".join(block[1]))
+    block_leaf_nodes = []
+    for node in block_text_nodes:
+        block_leaf_nodes.append(text_node_to_html_node(node))
+    return block_leaf_nodes
+    
     '''
     # Convert any un-ordered lists into a parent HTMLnode containing
     # list items as TextNodes

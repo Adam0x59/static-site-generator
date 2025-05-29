@@ -5,9 +5,9 @@ class TestMarkdownToHTML(unittest.TestCase):
     
     def test_markdown_to_html_debug(self):
        text = ("""
-# This is a heading
+# This is a heading with some **bold**, and _Italic_
                
-               
+###### This ia a H6 # title
 
      
 This is a paragraph of text. It has some **bold** and _italic_ words inside of it.
@@ -22,7 +22,7 @@ containing some code
 - This is another list item
 This is a paragraph
                 
-# This is a heading
+### This is a heading H3
                 
 - List item 1
 - List item 2
