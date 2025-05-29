@@ -146,7 +146,7 @@ def block_to_block_type(block):
         return BlockType.HEADING
     return BlockType.PARAGRAPH
 
-def block_to_text_node(block):
+def code_block_to_leaf_node(block):
     """Takes in markdown block and it's type, converts code blocks to LeafNodes.
 
     Invalid (non-code) Blocks are returned as is

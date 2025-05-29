@@ -27,15 +27,22 @@ This is a paragraph
 - List item 1
 - List item 2
     - Indented list item 1
-       - Second indented list item 1
-              1. ol_item 1
-              2. ol_item 2
-              3. ol_item 3
+        - Second indented list item 1
+            1. ol-item 1
+            2. ol-item 2
+            3. ol-item 3
     - Indented list item 2
 - List item 3
 
 Paragrah after a list block
+               
+1. Ordered List 1
+2. Ordered List 2
+3. Ordered List 3
                 
+3. New ordered list
+4. New ordered list
+               
 ```
 # This is a code block
 
@@ -45,10 +52,15 @@ This is a paragraph in a code block
 
 > Quote inside code block
 ```
+               
+3. OL out of order 1
+7. OL out of order 2
+5. OL out of order 3
 
 Paragraph after a code block.
 
 > This is a quote block
+> with **bold text** and _italic text_
 > Another line in a quote block
 > And another
 
