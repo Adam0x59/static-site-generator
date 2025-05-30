@@ -133,10 +133,40 @@ def convert_lists(list):
             for item in block[1]:
                 indentation_num = len(re.findall(r"^\s*", item)[0])
                 indentation_buffer.append((indentation_num, item.strip()))
-            indetation_buffer_to_HTMLnodes(indentation_buffer)
+            list_indentation_nodes(indentation_buffer)
             #indentation_index.append(indentation_buffer)
         #print(indentation_index)
 
+def list_indentation_nodes(list):
+    nodes = [ParentNode(None, None, None)]
+    nesting_depth = 0
+    current_index = 0
+    for item in list:
+        print(item)
+        if current_index == item[0]:
+            current_index = item[0]
+            nodes[-1].tag = line_to_block_type(item[1])
+            children_text = text_to_textnodes(item[1])
+            children_nodes = []
+            for item in children_text:
+                children_nodes.append(text_node_to_html_node(item))
+            nodes[-1].children.append(children_nodes)
+            continue
+        if current_index < item[0]:
+            current_index = item[0]
+            nodes[-1].children.append(ParentNode(None, None, None))
+            nodes[-1].tag = line_to_block_type(item[1])
+            children_text = text_to_textnodes(item[1])
+            children_nodes = [] 
+            for item in children_text:
+                children_nodes.append(text_node_to_html_node(item))
+            nodes[-1].children.append(children_nodes)
+
+
+    print("\n************\nList Split:")
+    print(f"\n{nodes}")
+            
+    print(nodes)
 
 '''
 def indetation_buffer_to_HTMLnodes(list):

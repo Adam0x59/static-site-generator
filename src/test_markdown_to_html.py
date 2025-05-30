@@ -17,7 +17,7 @@ This is a code block
 containing some code
 ```              
   
-- This is the first list item in a list block
+- This is the first list **item** in a list block
 - This is a list item
 - This is another list item
 This is a paragraph
