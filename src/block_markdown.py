@@ -6,12 +6,15 @@ from enum import Enum
 import re
 
 class BlockType(Enum):
-    PARAGRAPH = "paragraph"
-    HEADING = "heading"
+    PARAGRAPH = "p"
+    HEADING = "h"
     CODE = "code"
-    QUOTE = "quote"
-    UNORDERED_LIST = "unordered_list"
-    ORDERED_LIST = "ordered_list"
+    QUOTE = "quoteblock"
+    UNORDERED_LIST = "ul"
+    ORDERED_LIST = "ol"
+
+    def __repr__(self):
+        return str(self.value)
 
 def line_to_block_type(line):
     """Takes a line of text and returns BlockType object.

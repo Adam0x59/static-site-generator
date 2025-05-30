@@ -35,7 +35,12 @@ def markdown_to_html(markdown):
     # Convert quote blocks into LeafNodes wrapped in a HTMLnode
     cph_quotes = convert_quotes(cp_headings)
     # Convert list blocks into LeafNodes wrapped in HTMLnodes
-    cphq_lists = convert_lists(cph_quotes)
+    cphq_lists = convert_lists(cph_quotes, "-d")
+
+    for parent_node in cphq_lists:
+        if isinstance(parent_node, ParentNode):
+            print(ParentNode.to_html(parent_node))
+
 
 def block_text_to_leaf_nodes(block):
     block_text_nodes = text_to_textnodes("\n".join(block[1]))
@@ -50,26 +55,28 @@ def text_to_leaf_nodes(text):
         text_leaf_nodes = text_node_to_html_node(node)
     return text_leaf_nodes
 
-def identify_outer_block_types(list):
+def identify_outer_block_types(list, debug=None):
     markdown_block_tuples = []
     for block in list:
         block_joined = "\n".join(block)
         markdown_block_tuples.append((block_to_block_type(block_joined), block))
-    print("\n************\nOuter-Block Identification:")
-    for block in markdown_block_tuples:
-        print(f"\n{block}")
+    if debug == "-d":
+        print("\n************\nOuter-Block Identification:")
+        for block in markdown_block_tuples:
+            print(f"\n{block}")
     return markdown_block_tuples
 
-def convert_code_blocks(list):
+def convert_code_blocks(list, debug=None):
     code = []
     for block in list:
         code.append(code_block_to_leaf_node(block))
-    print("\n************\ncode converted:")
-    for block in code:
-        print(f"\n{repr(f"{block}")}")
+    if debug == "-d":
+        print("\n************\ncode converted:")
+        for block in code:
+            print(f"\n{repr(f"{block}")}")
     return code
 
-def convert_paragraphs(list):
+def convert_paragraphs(list, debug=None):
     c_paragraphs = []
     for block in list:
         if isinstance(block, (LeafNode, ParentNode, HTMLnode)):
@@ -79,12 +86,13 @@ def convert_paragraphs(list):
             c_paragraphs.append(ParentNode("p", block_text_to_leaf_nodes(block)))
             continue
         c_paragraphs.append(block)
-    print("\n************\nParagraphs Split:")
-    for block in c_paragraphs:
-        print(f"\n{repr(f"{block}")}")
+    if debug == "-d":
+        print("\n************\nParagraphs Split:")
+        for block in c_paragraphs:
+            print(f"\n{repr(f"{block}")}")
     return c_paragraphs
 
-def convert_headings(list):
+def convert_headings(list, debug=None):
     cp_headings = []
     for block in list:
         if isinstance(block, (LeafNode, ParentNode, HTMLnode)):
@@ -96,12 +104,13 @@ def convert_headings(list):
             cp_headings.append(ParentNode(f"h{heading_num}", block_text_to_leaf_nodes(block)))
             continue
         cp_headings.append(block)
-    print("\n************\nHeadings Split:")
-    for block in cp_headings:
-        print(f"\n{repr(f"{block}")}")
+    if debug == "-d":
+        print("\n************\nHeadings Split:")
+        for block in cp_headings:
+            print(f"\n{repr(f"{block}")}")
     return cp_headings
 
-def convert_quotes(list):
+def convert_quotes(list, debug=None):
     cph_quotes = []
     quote_lines_stripped = []
     for block in list:
@@ -116,14 +125,14 @@ def convert_quotes(list):
             cph_quotes.append(ParentNode("blockquote", block_text_to_leaf_nodes(block)))
             continue
         cph_quotes.append(block)
-    print("\n************\nQuotes Split:")
-    for block in cph_quotes:
-        print(f"\n{repr(f"{block}")}")
+    if debug == "-d":
+        print("\n************\nQuotes Split:")
+        for block in cph_quotes:
+            print(f"\n{repr(f"{block}")}")  
     return cph_quotes
 
-def convert_lists(list):
+def convert_lists(list, debug=None ):
     cphq_lists = []
-    indentation_index = []
     for block in list:
         if isinstance(block, (LeafNode, ParentNode, HTMLnode)):
             cphq_lists.append(block)
@@ -133,67 +142,94 @@ def convert_lists(list):
             for item in block[1]:
                 indentation_num = len(re.findall(r"^\s*", item)[0])
                 indentation_buffer.append((indentation_num, item.strip()))
-            list_indentation_nodes(indentation_buffer)
-            #indentation_index.append(indentation_buffer)
-        #print(indentation_index)
+            cphq_lists.append(list_indentation_nodes(indentation_buffer, debug))
+    if debug == "-d":
+        print("\n************\nLists Split:")
+        for block in cphq_lists:
+            print(f"\n{repr(f"{block}")}")
+    return cphq_lists
 
-def list_indentation_nodes(list):
+def list_indentation_nodes(list, debug):
     nodes = [ParentNode(None, None, None)]
-    nesting_depth = 0
-    current_index = 0
+    nesting_stack = [0]
+    #current_index = 0
     for item in list:
-        print(item)
-        if current_index == item[0]:
-            current_index = item[0]
-            nodes[-1].tag = line_to_block_type(item[1])
+        if nesting_stack[-1] == item[0]:
+            # Check if current nesting index exists in nesting_dict as a key.
+            # Add to dict if not present.
+            #if item[0] != nesting_stack[-1]:
+            #    nesting_stack.append(item[0])
+            # Check if current ParentNode has a tag, if tag is None update tag.
+            if nodes[-1].tag is None:    
+                nodes[-1].tag = repr(line_to_block_type(item[1]))
+            # Convert item text into list of text-nodes
             children_text = text_to_textnodes(item[1])
             children_nodes = []
-            for item in children_text:
-                children_nodes.append(text_node_to_html_node(item))
-            nodes[-1].children.append(children_nodes)
+            # Convert items in list of text-nodes into LeafNodes
+            for text in children_text:
+                children_nodes.append(text_node_to_html_node(text))
+            # Append list of LeafNodes into current ParentNode's list of children
+            nodes[-1].children.extend(children_nodes)
             continue
-        if current_index < item[0]:
-            current_index = item[0]
+
+        if item[0] > nesting_stack[-1]:
+            # Check if current nesting index exists in nesting_dict as a key.
+            # Add to dict if not present
+            if nesting_stack[-1] is not item[0]:
+                nesting_stack.append(item[0])
             nodes[-1].children.append(ParentNode(None, None, None))
-            nodes[-1].tag = line_to_block_type(item[1])
+            nodes.append(nodes[-1].children[-1])
+            nodes[-1].tag = repr(line_to_block_type(item[1]))
             children_text = text_to_textnodes(item[1])
-            children_nodes = [] 
-            for item in children_text:
-                children_nodes.append(text_node_to_html_node(item))
-            nodes[-1].children.append(children_nodes)
+            children_nodes = []
+            for text in children_text:
+                children_nodes.append(text_node_to_html_node(text))
+            nodes[-1].children.extend(children_nodes)
+            continue
 
+        if item[0] < nesting_stack[-1]:
+            while nesting_stack[-1] > item[0]:
+                nesting_stack.pop()
+                nodes.pop()
+            if nesting_stack[-1] == item[0]:
+                # Check if current nesting index exists in nesting_dict as a key.
+                # Add to dict if not present.
+                if item[0] != nesting_stack[-1]:
+                    nesting_stack.append(item[0])
+                # Check if current ParentNode has a tag, if tag is None update tag.
+                if nodes[-1].tag is None:    
+                    nodes[-1].tag = repr(line_to_block_type(item[1]))
+                # Convert item text into list of text-nodes  
+                children_text = text_to_textnodes(item[1])
+                children_nodes = []
+                # Convert items in list of text-nodes into LeafNodes
+                #print(children_text)
+                for text in children_text:
+                    #print(children_text)
+                    children_nodes.append(text_node_to_html_node(text))
+                # Append list of LeafNodes into current ParentNode's list of children
+                nodes[-1].children.extend(children_nodes)
+            continue
+    if debug == "-d": 
+        print("\n************\nList Split:")
+        print(nesting_stack)
+        for node in nodes:
+            print_tree(node)
+    return nodes[0]
 
-    print("\n************\nList Split:")
-    print(f"\n{nodes}")
-            
-    print(nodes)
+def print_tree(node, indent=0):
+    pad = "  " * indent
+    if isinstance(node, ParentNode):
+        print(f"{pad}ParentNode({node.tag})")
+        for child in node.children:
+            if isinstance(child, list):
+                for item in child:
+                    print_tree(item, indent + 1)
+            else:
+                print_tree(child, indent + 1)
+    elif isinstance(node, LeafNode):
+        print(f"{pad}LeafNode({node.value})")
 
-'''
-def indetation_buffer_to_HTMLnodes(list):
-    nodes = [(0,[])]
-    previous_indent = 0
-    current_indent = 0
-    current_node_index = 0
-
-    for item in list:
-        # set current indent to item[0]
-        current_indent = item[0]
-        # if current_indent is equal to previous_indent add item leaf nodes to current node.
-        if current_indent == previous_indent:
-            nodes[current_node_index][1].append(text_to_leaf_nodes(item[1]))
-        if current_indent > previous_indent:
-            current_node_index += 1
-            if (len(nodes)-1) < current_node_index:
-                nodes.append((current_node_index, []))
-                print(nodes)
-            nodes[current_node_index][1].append(text_to_leaf_nodes(item[1]))
-        if current_indent < previous_indent:
-            current_node_index -= 1
-            nodes[current_node_index][1].append(text_to_leaf_nodes(item[1]))
-        previous_indent = current_indent
-    print(nodes)
-    pass
-'''
     # *****************************************************
     # Re-assemble HTMLnodes into output file and return
     # *****************************************************
