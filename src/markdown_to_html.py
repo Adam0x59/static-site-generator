@@ -256,36 +256,72 @@ def list_indentation_nodes(blocks, debug=None):
                 nodes[-1].tag = repr(line_to_block_type(item[1]))
             children_text = text_to_textnodes(item[1])
             children_nodes = []
+            tagged_nodes = []
             for text in children_text:
-                children_nodes.append(text_node_to_html_node(text))
-            nodes[-1].children.extend(children_nodes)
+                match_dash = re.match(r"^- ", text.text)
+                match_num = re.match(r"^\d+\. ", text.text)
+                if match_dash:
+                    # starts with '- '
+                    text_stripped = TextNode((text.text[match_dash.end():]), text.text_type, text.url) 
+                elif match_num:
+                    # starts with '1. ' or '23. '
+                    text_stripped = TextNode((text.text[match_num.end():]), text.text_type, text.url)
+                else:
+                    text_stripped = text  
+                children_nodes.append(text_node_to_html_node(text_stripped))
+                tagged_nodes = [LeafNode(None, "<li>")] + children_nodes + [LeafNode(None, "</li>")]
+            nodes[-1].children.extend(tagged_nodes)
             continue
 
         if item[0] > nesting_stack[-1]:
             if nesting_stack[-1] is not item[0]:
                 nesting_stack.append(item[0])
+            nodes[-1].children.extend([LeafNode(None, "<li>")])
             nodes[-1].children.append(ParentNode(None, None, None))
             nodes.append(nodes[-1].children[-1])
             nodes[-1].tag = repr(line_to_block_type(item[1]))
             children_text = text_to_textnodes(item[1])
             children_nodes = []
             for text in children_text:
-                children_nodes.append(text_node_to_html_node(text))
-            nodes[-1].children.extend(children_nodes)
+                match_dash = re.match(r"^- ", text.text)
+                match_num = re.match(r"^\d+\. ", text.text)
+                if match_dash:
+                    # starts with '- '
+                    text_stripped = TextNode((text.text[match_dash.end():]), text.text_type, text.url) 
+                elif match_num:
+                    # starts with '1. ' or '23. '
+                    text_stripped = TextNode((text.text[match_num.end():]), text.text_type, text.url)
+                else:
+                    text_stripped = text  
+                children_nodes.append(text_node_to_html_node(text_stripped))
+                tagged_nodes = [LeafNode(None, "<li>")] + children_nodes + [LeafNode(None, "</li>")]
+            nodes[-1].children.extend(tagged_nodes)
             continue
 
         if item[0] < nesting_stack[-1]:
             while nesting_stack[-1] > item[0]:
                 nesting_stack.pop()
                 nodes.pop()
+                nodes[-1].children.extend([LeafNode(None, "</li>")])
             if nesting_stack[-1] == item[0]:
                 if nodes[-1].tag is None:    
                     nodes[-1].tag = repr(line_to_block_type(item[1]))
                 children_text = text_to_textnodes(item[1])
                 children_nodes = []
                 for text in children_text:
-                    children_nodes.append(text_node_to_html_node(text))
-                nodes[-1].children.extend(children_nodes)
+                    match_dash = re.match(r"^- ", text.text)
+                    match_num = re.match(r"^\d+\. ", text.text)
+                    if match_dash:
+                        # starts with '- '
+                        text_stripped = TextNode((text.text[match_dash.end():]), text.text_type, text.url) 
+                    elif match_num:
+                        # starts with '1. ' or '23. '
+                        text_stripped = TextNode((text.text[match_num.end():]), text.text_type, text.url)
+                    else:
+                        text_stripped = text 
+                    children_nodes.append(text_node_to_html_node(text_stripped))
+                    tagged_nodes = [LeafNode(None, "<li>")] + children_nodes + [LeafNode(None, "</li>")]
+                nodes[-1].children.extend(tagged_nodes)
             continue
     if debug == "-d": 
         print("\n************\nList Split:")
