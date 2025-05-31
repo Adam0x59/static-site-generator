@@ -86,7 +86,7 @@ Paragraph after a quote block
        
         node = markdown_to_html(md)
         html = node.to_html()
-        print(html)
+        #print(html)
         self.assertEqual(
             html,
             "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
@@ -102,7 +102,7 @@ Paragraph after a quote block
 
         node = markdown_to_html(md)
         html = node.to_html()
-        print(html)
+        #print(html)
         self.assertEqual(
             html,
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
@@ -119,7 +119,7 @@ Paragraph after a quote block
 """
         node = markdown_to_html(md)
         html = node.to_html()
-        print(html)
+        #print(html)
         self.assertEqual(
             html,
             "<div><h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3><h4>Heading 4</h4><h5>Heading 5</h5><h6>Heading 6</h6></div>"
@@ -133,7 +133,7 @@ Paragraph after a quote block
 """
         node = markdown_to_html(md)
         html = node.to_html()
-        print(html)
+        #print(html)
         self.assertEqual(
             html,
             "<div><ul><li>Item one with <i>italic</i></li><li>Item two with <b>bold</b></li><li>Item three with <code>code</code></li></ul></div>"
@@ -149,7 +149,7 @@ Paragraph after a quote block
 """
         node = markdown_to_html(md)
         html = node.to_html()
-        print(html)
+        #print(html)
         self.assertEqual(
             html,
             "<div><ol><li>First item</li><li>Second item<ul><li>Nested item one</li><li>Nested item two</li></ul></li><li>Third item</li></ol></div>"
@@ -162,7 +162,7 @@ Paragraph after a quote block
 """
         node = markdown_to_html(md)
         html = node.to_html()
-        print(html)
+        #print(html)
         self.assertEqual(
             html,
             "<div><blockquote>This is a quote with <b>bold</b><br>and <i>italic</i> on the next line<br></blockquote></div>"
@@ -181,7 +181,7 @@ Another paragraph here.
 """
         node = markdown_to_html(md)
         html = node.to_html()
-        print(html)
+        #print(html)
         self.assertEqual(
             html,
             "<div><h1>Title</h1><p>This is a paragraph with <code>code</code>.</p><ul><li>List item 1</li><li>List item 2</li></ul><p>Another paragraph here.</p></div>"
