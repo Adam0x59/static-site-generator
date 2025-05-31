@@ -1,6 +1,8 @@
 # Import all classes and functions from textnode and htmlnode modules.
 from textnode import *
 from htmlnode import *
+import os
+import shutil
 
 # Sanity check - if required - Yes main runs.
 # print("hello world")
@@ -15,7 +17,32 @@ def main ():
     print(text_node_test)
     print(text_node_test == text_node_test2)
     '''
+    rebuild_public_fs()
     pass # Placeholder to indicate intentional no-op
+
+
+def rebuild_public_fs():
+    if os.path.exists("public"):
+        #print("path exists")
+        shutil.rmtree("public")
+        #print("'public' dir removed!")
+    os.mkdir("public")
+    #print(f"empty 'public' dir created\n\n'public' contains: {os.listdir('public')}")
+    copy_static_contents_to_public("static", "public")
+
+def copy_static_contents_to_public(dir_from, dir_to):
+    for item in os.listdir(dir_from):
+        src_path = os.path.join(dir_from, item)
+        dst_path = os.path.join(dir_to, item)
+        if os.path.isfile(src_path):
+            #print(f"file found: {item}")
+            shutil.copy(src_path, dst_path)
+            #print(f"Added {item} to '{dir_to}'\n\n'{dir_to}' now contains: {os.listdir(f'{dir_to}')}")
+        else:
+            #print(f"Not a file, must be a dir: {item}")
+            os.mkdir(dst_path)
+            copy_static_contents_to_public(src_path, dst_path)
+    
 
 # Only run the main function if this file is executed directly.
 if __name__ == "__main__":
