@@ -39,10 +39,11 @@ def markdown_to_html(markdown):
     cph_quotes = convert_quotes(cp_headings, "-d")
     # Convert list blocks into LeafNodes wrapped in HTMLnodes
     cphq_lists = convert_lists(cph_quotes, "-d")
+    main_div = ParentNode("div", None, None)
+    for item in cphq_lists:
+        main_div.children.append(item)
 
-    for parent_node in cphq_lists:
-        if isinstance(parent_node, ParentNode):
-            print(ParentNode.to_html(parent_node))
+    print(main_div.to_html())
 
 
 def block_text_to_leaf_nodes(block):
@@ -160,7 +161,10 @@ def convert_headings(blocks, debug=None):
             continue
         if block[0] == BlockType.HEADING:
             heading_num = len(re.findall(r"^#{1,6}", "".join(block[1]))[0])
-            cp_headings.append(ParentNode(f"h{heading_num}", block_text_to_leaf_nodes(block)))
+            match_hash = re.match(r"^#{1,6} ", "".join(block[1]))
+            if match_hash:
+                text_stripped = (block[0], [("".join(block[1])[match_hash.end():])])
+            cp_headings.append(ParentNode(f"h{heading_num}", block_text_to_leaf_nodes(text_stripped)))
             continue
         cp_headings.append(block)
     debug_output(cp_headings, debug)
