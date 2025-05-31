@@ -68,6 +68,10 @@ class LeafNode(HTMLnode):
             raise ValueError("Leaf node has no value!")
         if self.tag is None:
             return self.value
+        if self.tag == "code":
+            return f"<pre><code{self.props_to_html()}>{self.value}</code></pre>"
+        if self.tag == "code-inline":
+            return f"<code{self.props_to_html()}>{self.value}</code>"
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
     
     def __repr__(self):

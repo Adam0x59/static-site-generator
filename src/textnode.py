@@ -6,7 +6,7 @@ class TextType(Enum):
 	TEXT = "normal text"
 	BOLD = "bold"
 	ITALIC = "italic"
-	CODE = "code"
+	CODE = "code-inline"
 	LINK = "link"
 	IMAGE = "image"
 
@@ -74,7 +74,7 @@ def text_node_to_html_node(text_node):
 	elif text_node.text_type == TextType.ITALIC:
 		return LeafNode("i", text_node.text)
 	elif text_node.text_type == TextType.CODE:
-		return LeafNode("code", text_node.text)
+		return LeafNode("code-inline", text_node.text)
 	elif text_node.text_type == TextType.LINK:
 		return LeafNode("a", text_node.text, {"href":text_node.url})
 	elif text_node.text_type == TextType.IMAGE:

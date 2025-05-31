@@ -164,8 +164,7 @@ def code_block_to_leaf_node(block):
         (block_type, block): If passed, returns tuple
     """
     if block[0] == BlockType.CODE:
-        return LeafNode("code", "\n".join(block[1][1:-1]))
-
+        return LeafNode("code", "\n".join(block[1][1:-1]) + "\n")
     return block
 
 def list_formatter(block):

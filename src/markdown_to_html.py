@@ -28,22 +28,53 @@ def markdown_to_html(markdown):
         print(block)
     # Identify outer block types, convert into list of tuples 
     # [(BlockType, markdown Block), ...]
-    markdown_block_tuples = identify_outer_block_types(markdown_blocks, "-d")
+    markdown_block_tuples = identify_outer_block_types(markdown_blocks)
     # Convert any code blocks into leaf nodes
-    code = convert_code_blocks(markdown_block_tuples, "-d")
+    code = convert_code_blocks(markdown_block_tuples)
     # Convert any paragraphs into LeafNodes wrapped in a HTMLnode
-    c_paragraphs = convert_paragraphs(code, "-d")
+    c_paragraphs = convert_paragraphs(code)
     # Convert any headings into LeafNodes wrapped in a HTMLnode
-    cp_headings = convert_headings(c_paragraphs, "-d")
+    cp_headings = convert_headings(c_paragraphs)
     # Convert quote blocks into LeafNodes wrapped in a HTMLnode
-    cph_quotes = convert_quotes(cp_headings, "-d")
+    cph_quotes = convert_quotes(cp_headings)
     # Convert list blocks into LeafNodes wrapped in HTMLnodes
-    cphq_lists = convert_lists(cph_quotes, "-d")
+    cphq_lists = convert_lists(cph_quotes)
     main_div = ParentNode("div", None, None)
     for item in cphq_lists:
         main_div.children.append(item)
-
     print(main_div.to_html())
+    return main_div
+    
+
+def paragraph_to_leaf_nodes(block):
+    '''Converts a Markdown paragraph into a list of LeafNode objects.
+
+    Args:
+        block (tuple): A tuple of (block_type, lines), where lines is a list of strings representing the block content.
+
+    Returns:
+        list: A list of LeafNode objects representing inline content.
+    '''
+    block_text_nodes = text_to_textnodes(" ".join(block[1]))
+    block_leaf_nodes = []
+    for node in block_text_nodes:
+        block_leaf_nodes.append(text_node_to_html_node(node))
+    return block_leaf_nodes
+
+def quote_to_leaf_nodes(block):
+    '''Converts a Markdown paragraph into a list of LeafNode objects.
+
+    Args:
+        block (tuple): A tuple of (block_type, lines), where lines is a list of strings representing the block content.
+
+    Returns:
+        list: A list of LeafNode objects representing inline content.
+    '''
+    block_text_nodes = text_to_textnodes("".join(block[1]))
+    block_leaf_nodes = []
+    for node in block_text_nodes:
+        block_leaf_nodes.append(text_node_to_html_node(node))
+    return block_leaf_nodes
 
 
 def block_text_to_leaf_nodes(block):
@@ -133,7 +164,7 @@ def convert_paragraphs(blocks, debug=None):
             c_paragraphs.append(block)
             continue
         if block[0] == BlockType.PARAGRAPH:
-            c_paragraphs.append(ParentNode("p", block_text_to_leaf_nodes(block)))
+            c_paragraphs.append(ParentNode("p", paragraph_to_leaf_nodes(block)))
             continue
         c_paragraphs.append(block)
     debug_output(c_paragraphs, debug)
@@ -194,9 +225,10 @@ def convert_quotes(blocks, debug=None):
         if block[0] == BlockType.QUOTE:
             quote_lines_stripped = []
             for item in block[1]:
-                quote_lines_stripped.append(item[2:] if item.startswith('> ') else item)
+                item_w_line_seperator = item + "<br>"
+                quote_lines_stripped.append(item_w_line_seperator[2:] if item_w_line_seperator.startswith('> ') else item_w_line_seperator)
             stripped_block = (BlockType.QUOTE, quote_lines_stripped)
-            cph_quotes.append(ParentNode("blockquote", block_text_to_leaf_nodes(stripped_block)))
+            cph_quotes.append(ParentNode("blockquote", quote_to_leaf_nodes(stripped_block)))
             continue
         cph_quotes.append(block)
     debug_output(cph_quotes, debug)
@@ -260,7 +292,6 @@ def list_indentation_nodes(blocks, debug=None):
                 nodes[-1].tag = repr(line_to_block_type(item[1]))
             children_text = text_to_textnodes(item[1])
             children_nodes = []
-            tagged_nodes = []
             for text in children_text:
                 match_dash = re.match(r"^- ", text.text)
                 match_num = re.match(r"^\d+\. ", text.text)
@@ -273,14 +304,15 @@ def list_indentation_nodes(blocks, debug=None):
                 else:
                     text_stripped = text  
                 children_nodes.append(text_node_to_html_node(text_stripped))
-                tagged_nodes = [LeafNode(None, "<li>")] + children_nodes + [LeafNode(None, "</li>")]
+                tagged_nodes = [LeafNode(None, "<li>")] + children_nodes + [LeafNode(None, "</li>")]    
             nodes[-1].children.extend(tagged_nodes)
             continue
 
         if item[0] > nesting_stack[-1]:
             if nesting_stack[-1] is not item[0]:
                 nesting_stack.append(item[0])
-            nodes[-1].children.extend([LeafNode(None, "<li>")])
+            #nodes[-1].children.extend([LeafNode(None, "<li>")])
+            nodes[-1].children.pop()
             nodes[-1].children.append(ParentNode(None, None, None))
             nodes.append(nodes[-1].children[-1])
             nodes[-1].tag = repr(line_to_block_type(item[1]))
@@ -316,10 +348,8 @@ def list_indentation_nodes(blocks, debug=None):
                     match_dash = re.match(r"^- ", text.text)
                     match_num = re.match(r"^\d+\. ", text.text)
                     if match_dash:
-                        # starts with '- '
                         text_stripped = TextNode((text.text[match_dash.end():]), text.text_type, text.url) 
                     elif match_num:
-                        # starts with '1. ' or '23. '
                         text_stripped = TextNode((text.text[match_num.end():]), text.text_type, text.url)
                     else:
                         text_stripped = text 
@@ -327,12 +357,34 @@ def list_indentation_nodes(blocks, debug=None):
                     tagged_nodes = [LeafNode(None, "<li>")] + children_nodes + [LeafNode(None, "</li>")]
                 nodes[-1].children.extend(tagged_nodes)
             continue
+    while len(nodes) > 1:
+        nodes.pop()
+        nodes[-1].children.extend([LeafNode(None, "</li>")])
     if debug == "-d": 
         print("\n************\nList Split:")
         print(nesting_stack)
         for node in nodes:
             print_tree(node)
     return nodes[0]
+
+
+def add_nodes_to_parent(item):
+    children_text = text_to_textnodes(item[1])
+    children_nodes = []
+    for text in children_text:
+        match_dash = re.match(r"^- ", text.text)
+        match_num = re.match(r"^\d+\. ", text.text)
+        if match_dash:
+            # starts with '- '
+            text_stripped = TextNode((text.text[match_dash.end():]), text.text_type, text.url) 
+        elif match_num:
+            # starts with '1. ' or '23. '
+            text_stripped = TextNode((text.text[match_num.end():]), text.text_type, text.url)
+        else:
+            text_stripped = text  
+        children_nodes.append(text_node_to_html_node(text_stripped))
+        tagged_nodes = [LeafNode(None, "<li>")] + children_nodes + [LeafNode(None, "</li>")]
+    return tagged_nodes
 
 def print_tree(node, indent=0):
     '''Recursively prints the structure of a tree rooted at a ParentNode.
