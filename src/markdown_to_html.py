@@ -24,8 +24,8 @@ def markdown_to_html(markdown):
 
     # Convert markdown into blocks
     markdown_blocks = markdown_to_blocks(markdown)
-    for block in markdown_blocks:
-        print(block)
+    #for block in markdown_blocks:
+        #print(block)
     # Identify outer block types, convert into list of tuples 
     # [(BlockType, markdown Block), ...]
     markdown_block_tuples = identify_outer_block_types(markdown_blocks)
@@ -42,7 +42,7 @@ def markdown_to_html(markdown):
     main_div = ParentNode("div", None, None)
     for item in cphq_lists:
         main_div.children.append(item)
-    print(main_div.to_html())
+    #print(main_div.to_html())
     return main_div
     
 

@@ -1,6 +1,7 @@
 # Import all classes and functions from textnode and htmlnode modules.
 from textnode import *
 from htmlnode import *
+from markdown_to_html import *
 import os
 import shutil
 
@@ -18,8 +19,41 @@ def main ():
     print(text_node_test == text_node_test2)
     '''
     rebuild_public_fs()
-    pass # Placeholder to indicate intentional no-op
+    content = extract_file_contents("test.md")
+    extract_title(content)
+    pass 
 
+def extract_file_contents(filepath):
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+    return content
+
+def extract_title(markdown):
+    html_node = markdown_to_html(markdown)
+    heading = find_title(html_node)
+    print(f"heading_found: {heading}")
+    heading_text = "".join(child.value for child in heading.children)
+    print(heading_text)
+
+
+def find_title(node):
+    if isinstance(node, list):  # if a list, iterate over it
+        for child in node:
+            result = find_title(child)
+            if result:
+                return result
+        return None
+
+    if hasattr(node, "tag") and node.tag == "h1":
+        return node
+
+    if hasattr(node, "children"):
+        return find_title(node.children)
+    
+    raise Exception
+
+            
+    pass
 
 def rebuild_public_fs():
     if os.path.exists("public"):
