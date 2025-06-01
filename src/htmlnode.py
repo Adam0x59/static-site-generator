@@ -72,6 +72,8 @@ class LeafNode(HTMLnode):
             return f"<pre><code{self.props_to_html()}>{self.value}</code></pre>"
         if self.tag == "code-inline":
             return f"<code{self.props_to_html()}>{self.value}</code>"
+        if self.tag == "img":
+            return f"<{self.tag}{self.props_to_html()}{self.value}/>"
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
     
     def __repr__(self):
@@ -116,6 +118,8 @@ class ParentNode(HTMLnode):
             raise ValueError("Parent node has no tag")
         if not self.children:
             raise ValueError("Children list is empty or does not exist")
+        if self.tag == "img":
+            return f"<{self.tag}{self.props_to_html()}>{self.value}/>"
         # Recursively generate HTML for all non-None children.
         child_string_list = [item.to_html() for item in self.children if item is not None]
         # Return string, fill in centre with joined list from recursive function output

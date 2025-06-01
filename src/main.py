@@ -19,9 +19,30 @@ def main ():
     print(text_node_test == text_node_test2)
     '''
     rebuild_public_fs()
-    content = extract_file_contents("test.md")
-    extract_title(content)
+    generate_page("content/index.md", "template.html", "public/index.html")
+    #content = extract_file_contents("test.md")
+    #extract_title(content)
     pass 
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"\nGenerating page from {from_path} to {dest_path}, using {template_path}")
+    md_file =extract_file_contents(from_path)
+    print(f"\n{md_file}")
+    template_file = extract_file_contents(template_path)
+    print(f"\n{template_file}")
+    md_file_html = markdown_to_html(md_file)
+    file_html = md_file_html.to_html()
+    md_file_title = extract_title(md_file)
+    template_file_title_replaced = template_file.replace("{{ Title }}", md_file_title)
+    template_file_content_replaced = template_file_title_replaced.replace("{{ Content }}", file_html)
+    with open(dest_path, "w") as f:
+        f.write(template_file_content_replaced)
+    print("\n***Page Generation Success***")
+
+
+
+
+    pass
 
 def extract_file_contents(filepath):
     with open(filepath, "r", encoding="utf-8") as f:
@@ -48,15 +69,11 @@ def find_title(node):
             result = find_title(child)
             if result:
                 return result
-            
         return None
-
     if hasattr(node, "tag") and node.tag == "h1":
         return node
-
     if hasattr(node, "children"):
         return find_title(node.children)
-    
     raise Exception("No title found in markdown")
 
             

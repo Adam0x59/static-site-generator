@@ -226,7 +226,7 @@ def convert_quotes(blocks, debug=None):
             quote_lines_stripped = []
             for item in block[1]:
                 item_w_line_seperator = item + "<br>"
-                quote_lines_stripped.append(item_w_line_seperator[2:] if item_w_line_seperator.startswith('> ') else item_w_line_seperator)
+                quote_lines_stripped.append(re.sub(r"^>\s*", "", item_w_line_seperator))
             stripped_block = (BlockType.QUOTE, quote_lines_stripped)
             cph_quotes.append(ParentNode("blockquote", quote_to_leaf_nodes(stripped_block)))
             continue
