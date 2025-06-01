@@ -25,7 +25,7 @@ def main ():
     else:
         basepath = "/"
     
-    
+    rebuild_fs("docs")
     generate_site("content", "docs", "template.html")
     #generate_site("basepath ")
 
@@ -34,7 +34,6 @@ def main ():
     pass 
 
 def generate_site(basepath, dir_to, template_path):
-    rebuild_fs(dir_to)
     for item in os.listdir(basepath):
         #print(item)
         src_path = os.path.join(basepath, item)
