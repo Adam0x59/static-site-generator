@@ -34,7 +34,7 @@ def main ():
     pass 
 
 def generate_site(basepath, dir_to, template_path):
-    rebuild_public_fs(basepath, dir_to)
+    rebuild_fs(dir_to)
     for item in os.listdir(basepath):
         #print(item)
         src_path = os.path.join(basepath, item)
@@ -113,14 +113,14 @@ def find_title(node):
             
     pass
 
-def rebuild_public_fs(dir_from, dir_to):
+def rebuild_fs(dir_to):
     if os.path.exists(dir_to):
         #print("path exists")
         shutil.rmtree(dir_to)
         #print("'public' dir removed!")
     os.mkdir(dir_to)
     #print(f"empty 'public' dir created\n\n'public' contains: {os.listdir('public')}")
-    copy_one_dir_contents_to_another(dir_from, dir_to)
+    copy_one_dir_contents_to_another("static", dir_to)
 
 def copy_one_dir_contents_to_another(dir_from, dir_to):
     for item in os.listdir(dir_from):
