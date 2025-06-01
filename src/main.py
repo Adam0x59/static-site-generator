@@ -26,35 +26,35 @@ def main ():
         basepath = "/"
     
     rebuild_fs("docs")
-    generate_site("content", "docs", "template.html")
+    generate_site("content", "docs", "template.html", basepath)
     #generate_site("basepath ")
 
     #content = extract_file_contents("test.md")
     #extract_title(content)
     pass 
 
-def generate_site(basepath, dir_to, template_path):
-    for item in os.listdir(basepath):
+def generate_site(dir_from, dir_to, template_path, basepath):
+    for item in os.listdir(dir_from):
         #print(item)
-        src_path = os.path.join(basepath, item)
+        src_path = os.path.join(dir_from, item)
         #print(src_path)
         dst_path = os.path.join(dir_to, re.sub(r"\..*$", ".html", item))
         #print(dst_path)
         if os.path.isfile(src_path):
-            generate_page(src_path, template_path, dst_path)
+            generate_page(src_path, template_path, dst_path, basepath)
         else:
-            generate_site(src_path, dst_path, template_path)
+            generate_site(src_path, dst_path, template_path, basepath)
     
-def generate_page(basepath, template_path, dest_path):
-    md_file =extract_file_contents(basepath)
+def generate_page(src_path, template_path, dest_path, basepath):
+    md_file =extract_file_contents(src_path)
     template_file = extract_file_contents(template_path)
     md_file_html = markdown_to_html(md_file)
     file_html = md_file_html.to_html()
     md_file_title = extract_title(md_file)
     template_file_title_replaced = template_file.replace("{{ Title }}", md_file_title)
     template_file_content_replaced = template_file_title_replaced.replace("{{ Content }}", file_html)
-    template_file_href_replace = template_file_content_replaced.replace("href\"/", "href\"{basepath}")
-    template_file_src_replace = template_file_href_replace.replace("src\"/", "src\"{basepath}")
+    template_file_href_replace = template_file_content_replaced.replace('href="/', f'href="{basepath}')
+    template_file_src_replace = template_file_href_replace.replace('src="/', f'src="{basepath}')
     if os.path.exists(os.path.dirname(dest_path)):
         with open(dest_path, "w") as f:
             f.write(template_file_href_replace)
