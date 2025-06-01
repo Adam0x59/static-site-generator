@@ -57,7 +57,7 @@ def generate_page(src_path, template_path, dest_path, basepath):
     template_file_src_replace = template_file_href_replace.replace('src="/', f'src="{basepath}')
     if os.path.exists(os.path.dirname(dest_path)):
         with open(dest_path, "w") as f:
-            f.write(template_file_href_replace)
+            f.write(template_file_src_replace)
     else:
         create_dir(os.path.dirname(dest_path))
         with open(dest_path, "w") as f:
