@@ -1,3 +1,2 @@
 # Do not track any directories named __pycache__ with git.
 __pycache__/
-public/

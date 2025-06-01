@@ -4,6 +4,7 @@ from htmlnode import *
 from markdown_to_html import *
 import os
 import shutil
+import sys
 
 # Sanity check - if required - Yes main runs.
 # print("hello world")
@@ -18,78 +19,57 @@ def main ():
     print(text_node_test)
     print(text_node_test == text_node_test2)
     '''
-    rebuild_public_fs()
-    generate_site("content", "public", "template.html")
+
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+    else:
+        basepath = "/"
+    
+    
+    generate_site("content", "docs", "template.html")
+    #generate_site("basepath ")
 
     #content = extract_file_contents("test.md")
     #extract_title(content)
     pass 
 
-def generate_site(dir_from, dir_to, template_path):
-    for item in os.listdir(dir_from):
-        print(item)
-        src_path = os.path.join(dir_from, item)
-        print(src_path)
+def generate_site(basepath, dir_to, template_path):
+    rebuild_public_fs(basepath, dir_to)
+    for item in os.listdir(basepath):
+        #print(item)
+        src_path = os.path.join(basepath, item)
+        #print(src_path)
         dst_path = os.path.join(dir_to, re.sub(r"\..*$", ".html", item))
-        print(dst_path)
+        #print(dst_path)
         if os.path.isfile(src_path):
-            #print(f"file found: {item}")
             generate_page(src_path, template_path, dst_path)
-            #print(f"Added {item} to '{dir_to}'\n\n'{dir_to}' now contains: {os.listdir(f'{dir_to}')}")
         else:
-            #print(f"Not a file, must be a dir: {item}")
-            #dir_to_make = dst_path 
-            #os.mkdir(dst_path)
             generate_site(src_path, dst_path, template_path)
-
-'''
-def generate_site(content_root_dir_path, template_path, dest_path):
-    # Loop through all files
-    for item in os.listdir(content_root_dir_path, dest_path):
-        src_path = os.path.join(content_root_dir_path, item)
-        dst_path = os.path.join(dest_path, item)
-        if os.path.isfile(src_path):
-            #print(f"file found: {item}")
-            print(f"{src_path}")
-            generate_page(src_path, template_path, dest_path)
-            #print(f"Added {item} to '{dir_to}'\n\n'{dir_to}' now contains: {os.listdir(f'{dir_to}')}")
-        else:
-            #print(f"Not a file, must be a dir: {item}")
-            os.mkdir(dst_path)
-            copy_one_dir_contents_to_another(src_path, dst_path) 
-    pass
-'''
     
-def generate_page(from_path, template_path, dest_path):
-    print(f"\nGenerating page from {from_path} to {dest_path}, using {template_path}")
-    print(os.path.dirname(dest_path))
-    md_file =extract_file_contents(from_path)
-    #print(f"\n{md_file}")
+def generate_page(basepath, template_path, dest_path):
+    md_file =extract_file_contents(basepath)
     template_file = extract_file_contents(template_path)
-    #print(f"\n{template_file}")
     md_file_html = markdown_to_html(md_file)
     file_html = md_file_html.to_html()
     md_file_title = extract_title(md_file)
     template_file_title_replaced = template_file.replace("{{ Title }}", md_file_title)
     template_file_content_replaced = template_file_title_replaced.replace("{{ Content }}", file_html)
-    #filepath = 
-    print(f"Dest-Path: {dest_path}")
-    print(f"os.path.dirname: {os.path.dirname(dest_path)}")
+    template_file_href_replace = template_file_content_replaced.replace("href\"/", "href\"{basepath}")
+    template_file_src_replace = template_file_href_replace.replace("src\"/", "src\"{basepath}")
     if os.path.exists(os.path.dirname(dest_path)):
         with open(dest_path, "w") as f:
-            f.write(template_file_content_replaced)
+            f.write(template_file_href_replace)
     else:
         create_dir(os.path.dirname(dest_path))
         with open(dest_path, "w") as f:
-            f.write(template_file_content_replaced)
-        
-    print("\n***Page Generation Success***")
+            f.write(template_file_src_replace)
+    
 
 def create_dir(dest_path):
-    print(f"create_dir initial Dest-Path: {dest_path}")
+    #print(f"create_dir initial Dest-Path: {dest_path}")
     if os.path.exists(os.path.dirname(dest_path)):
-        print(f"Dest-Path: {dest_path}")
-        print(f"Dir {os.path.dirname(dest_path)} exists, creating {dest_path}")
+        #print(f"Dest-Path: {dest_path}")
+        #print(f"Dir {os.path.dirname(dest_path)} exists, creating {dest_path}")
         if not os.path.exists(dest_path):
             os.mkdir(dest_path)
     else:
@@ -106,14 +86,14 @@ def extract_file_contents(filepath):
 def extract_title(markdown):
     html_node = markdown_to_html(markdown)
     heading = find_title(html_node)
-    print(f"heading_found: {heading}")
+    #print(f"heading_found: {heading}")
     #if isinstance(heading, ParentNode) and heading.value:
     if not heading:
         raise Exception("No title found in markdown")
     heading_text = "".join(child.value for child in heading.children)
     #else:
     #    raise Exception("No title found in markdown")
-    print(heading_text)
+    #print(heading_text)
     return heading_text
 
 
@@ -133,14 +113,14 @@ def find_title(node):
             
     pass
 
-def rebuild_public_fs():
-    if os.path.exists("public"):
+def rebuild_public_fs(dir_from, dir_to):
+    if os.path.exists(dir_to):
         #print("path exists")
-        shutil.rmtree("public")
+        shutil.rmtree(dir_to)
         #print("'public' dir removed!")
-    os.mkdir("public")
+    os.mkdir(dir_to)
     #print(f"empty 'public' dir created\n\n'public' contains: {os.listdir('public')}")
-    copy_one_dir_contents_to_another("static", "public")
+    copy_one_dir_contents_to_another(dir_from, dir_to)
 
 def copy_one_dir_contents_to_another(dir_from, dir_to):
     for item in os.listdir(dir_from):
